@@ -1,4 +1,4 @@
-# coding=utf-8
+# coding:utf-8
 
 __package_name__ = "casm"
 __prog_name__ = "casm"

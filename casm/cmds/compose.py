@@ -13,9 +13,9 @@ from xarg import commands
 from xarg import run_command
 import yaml
 
-from ..util import URL_PROG
-from ..util import __prog_compose__
-from ..util import __version__
+from ..utils import URL_PROG
+from ..utils import __prog_compose__
+from ..utils import __version__
 
 DEF_INSTANCE = "assembler.yml"
 KEY_VARIABLES = "variables"
