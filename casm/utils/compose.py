@@ -2,32 +2,47 @@
 
 import hashlib
 import os
+from typing import Any
 from typing import Dict
-from typing import Iterator
 from typing import List
 from typing import Optional
+from typing import Union
 
 from podman_compose import norm_re
 from podman_compose import parse_short_mount
 import yaml
 
 
-def default_project_name(compose_file: str):
-    realpath = os.path.realpath(compose_file)
-    dirname = os.path.dirname(realpath)
-    basename = os.path.basename(dirname)
+def default_project_name(basedir: str):
+    assert isinstance(basedir, str)
+    assert os.path.isdir(basedir)
+    realpath = os.path.realpath(basedir)
+    basename = os.path.basename(realpath)
     return norm_re.sub("", basename.lower())
 
 
 class compose_volume:
 
-    def __init__(self, root, title: str, value: Dict):
-        assert isinstance(root, compose_file)
+    def __init__(self, volumes, title: str):
+        assert isinstance(volumes, compose_volumes)
+        volumes.content.setdefault(title, {})
+        if volumes.content[title] is None:
+            volumes.content[title] = {}
+        value = volumes.content[title]
         assert isinstance(title, str)
-        assert isinstance(value, Dict)
-        self.__root = root
-        self.__title = title
-        self.__value = value
+        assert isinstance(value, dict)
+        self.__root: compose_file = volumes.root
+        self.__volumes: compose_volumes = volumes
+        self.__title: str = title
+        self.__value: Dict[str, Any] = value
+
+    @property
+    def root(self):
+        return self.__root
+
+    @property
+    def volumes(self):
+        return self.__volumes
 
     @property
     def title(self) -> str:
@@ -51,15 +66,17 @@ class compose_volume:
 
 
 class compose_volumes:
+    KEY = "volumes"
 
     def __init__(self, root):
         assert isinstance(root, compose_file)
-        volumes = root.content.get("volumes", {})
+        root.content.setdefault(self.KEY, {})
+        volumes = root.content.get(self.KEY)
         assert isinstance(volumes, Dict)
-        self.__root = root
-        self.__volumes = {
-            title: compose_volume(self.__root, title, value)
-            for title, value in volumes.items()
+        self.__root: compose_file = root
+        self.__content: Dict[str, Any] = volumes
+        self.__volumes: Dict[str, compose_volume] = {
+            title: compose_volume(self, title) for title in volumes
         }
 
     def __iter__(self):
@@ -76,16 +93,38 @@ class compose_volumes:
         if title in self.__volumes:
             del self.__volumes[title]
 
+    @property
+    def root(self):
+        return self.__root
+
+    @property
+    def content(self) -> Dict[str, Any]:
+        assert isinstance(self.__content, dict)
+        return self.__content
+
 
 class compose_network:
 
-    def __init__(self, root, title: str, value: Dict):
-        assert isinstance(root, compose_file)
+    def __init__(self, networks, title: str):
+        assert isinstance(networks, compose_networks)
+        networks.content.setdefault(title, {})
+        if networks.content[title] is None:
+            networks.content[title] = {}
+        value = networks.content[title]
         assert isinstance(title, str)
-        assert isinstance(value, Dict)
-        self.__root = root
-        self.__title = title
-        self.__value = value
+        assert isinstance(value, dict)
+        self.__root: compose_file = networks.root
+        self.__networks: compose_networks = networks
+        self.__title: str = title
+        self.__value: Dict[str, Any] = value
+
+    @property
+    def root(self):
+        return self.__root
+
+    @property
+    def networks(self):
+        return self.__networks
 
     @property
     def title(self) -> str:
@@ -97,15 +136,17 @@ class compose_network:
 
 
 class compose_networks:
+    KEY = "networks"
 
     def __init__(self, root):
         assert isinstance(root, compose_file)
-        networks = root.content.get("networks", {})
+        root.content.setdefault(self.KEY, {})
+        networks = root.content.get(self.KEY)
         assert isinstance(networks, Dict)
-        self.__root = root
-        self.__networks = {
-            title: compose_network(self.__root, title, value)
-            for title, value in networks.items()
+        self.__root: compose_file = root
+        self.__content: Dict[str, Any] = networks
+        self.__networks: Dict[str, compose_network] = {
+            title: compose_network(self, title) for title in networks
         }
 
     def __iter__(self):
@@ -122,19 +163,36 @@ class compose_networks:
         if title in self.__networks:
             del self.__networks[title]
 
+    @property
+    def root(self):
+        return self.__root
+
+    @property
+    def content(self) -> Dict[str, Any]:
+        assert isinstance(self.__content, dict)
+        return self.__content
+
 
 class service_volume:
+    '''
+    Short syntax: [SOURCE:]TARGET[:MODE]
 
-    def __init__(self, root, service, value):
-        assert isinstance(root, compose_file)
-        assert isinstance(service, compose_service)
-        assert isinstance(value, str)
-        self.__root = root
-        self.__service = service
-        self.__value = value
-        self.__mount = parse_short_mount(value, root.dirname)
-        assert isinstance(self.__mount, dict)
-        self.__volume_name = self.__get_volume_name()
+    Long syntax: Added in version 3.2 file format.
+    https://docs.docker.com/compose/compose-file/compose-file-v3/#long-syntax-3
+    '''
+
+    def __init__(self, volumes, value: Union[str, Dict[str, Any]]):
+        assert isinstance(volumes, service_volumes)
+        assert isinstance(value, str) or isinstance(value, dict)
+        service = volumes.service
+        self.__root: compose_file = service.root
+        self.__service: compose_service = service
+        self.__volumes: service_volumes = volumes
+        self.__value: Union[str, Dict[str, Any]] = value
+        if isinstance(value, str):
+            short = parse_short_mount(value, self.__root.basedir)
+            assert isinstance(short, dict)
+            self.__short = short
 
     def __get_volume_name(self) -> Optional[str]:
         '''
@@ -149,7 +207,6 @@ class service_volume:
                     _volume = vol
                     break
             assert isinstance(_volume, compose_volume)
-            # self.__volume = _volume
             name = _volume.name
             if not source:
                 __volume_name = "_".join([
@@ -171,77 +228,115 @@ class service_volume:
         return __volume_name
 
     @property
-    def value(self) -> str:
+    def volumes(self):
+        return self.__volumes
+
+    @property
+    def value(self) -> Union[str, Dict[str, Any]]:
         return self.__value
+
+    @value.setter
+    def value(self, new: Union[str, Dict[str, Any]]):
+        if isinstance(new, str):
+            short = parse_short_mount(new, self.__root.basedir)
+            assert isinstance(short, dict)
+            self.__short = short
+        self.__value = new
+        self.volumes.update()
+
+    @property
+    def generic(self) -> Dict[str, Any]:
+        return self.__short if isinstance(self.__value, str) else self.__value
 
     @property
     def type(self) -> str:
-        type = self.__mount.get("type", None)
+        '''
+        "bind", "volume"
+        '''
+        type = self.generic.get("type", None)
         assert isinstance(type, str)
         return type
 
     @property
     def source(self) -> str:
-        source = self.__mount.get("source", None)
+        source = self.generic.get("source", None)
         assert isinstance(source, str)
         return source
 
     @property
     def target(self) -> str:
-        target = self.__mount.get("target", None)
+        target = self.generic.get("target", None)
         assert isinstance(target, str)
         return target
 
     @property
-    def read_only(self) -> Optional[bool]:
-        read_only = self.__mount.get("read_only", None)
-        assert isinstance(read_only, bool) or read_only is None
+    def read_only(self) -> bool:
+        '''
+        default read-write(rw)
+        '''
+        read_only = self.generic.get("read_only", False)
+        assert isinstance(read_only, bool)
         return read_only
 
     @property
     def volume_name(self) -> Optional[str]:
-        return self.__volume_name
+        return self.__get_volume_name()
 
 
 class service_volumes:
+    KEY = "volumes"
 
-    def __init__(self, root, service, value: List[str]):
-        assert isinstance(root, compose_file)
+    def __init__(self, service):
         assert isinstance(service, compose_service)
-        assert isinstance(value, list)
-        self.__root = root
-        self.__service = service
-        self.__volumes = [
-            service_volume(self.__root, self.__service, vol) for vol in value
-        ]
+        service.value.setdefault(self.KEY, [])
+        volumes = service.value.get(self.KEY)
+        assert isinstance(volumes, list)
+        self.__service: compose_service = service
+        self.__content: List[Union[str, Dict[str, Any]]] = volumes
+        self.__volumes = [service_volume(self, vol) for vol in volumes]
 
     def __iter__(self):
         return iter(self.__volumes)
 
     @property
-    def value(self) -> List[str]:
-        return [volume.value for volume in self.__volumes]
+    def service(self):
+        return self.__service
 
-    @value.setter
-    def value(self, value: List[str]):
-        assert isinstance(value, list)
-        self.__volumes = [
-            service_volume(self.__root, self.__service, vol) for vol in value
-        ]
+    def update(self):
+        self.__content.clear()
+        for volume in self.__volumes:
+            self.__content.append(volume.value)
+
+    def append(self, value: Union[str, Dict[str, Any]]):
+        volume = service_volume(self, value)
+        self.__volumes.append(volume)
+        self.__content.append(value)
 
 
 class compose_service:
 
-    def __init__(self, root, title: str, value: Dict, replica: int = 1):
-        assert isinstance(root, compose_file)
+    def __init__(self, services, title: str, replica: int = 1):
+        assert isinstance(services, compose_services)
+        services.content.setdefault(title, {})
+        if services.content[title] is None:
+            services.content[title] = {}
+        value = services.content[title]
         assert isinstance(title, str)
-        assert isinstance(value, Dict)
-        self.__root = root
-        self.__title = title
-        self.__value = value
-        self.__replica = replica
-        self.__volumes = service_volumes(self.__root, self,
-                                         self.__value.get("volumes", []))
+        assert isinstance(value, dict)
+        self.__root: compose_file = services.root
+        self.__services: compose_services = services
+        self.__title: str = title
+        self.__value: Dict[str, Any] = value
+        self.__replica: int = replica
+        self.__volumes = service_volumes(self)
+
+    @property
+    def root(self):
+        return self.__root
+
+    @property
+    def services(self):
+        return self.__services
 
     @property
     def title(self) -> str:
@@ -276,17 +371,31 @@ class compose_service:
         if isinstance(value, service_volumes):
             self.__volumes = value
 
+    def mount(self, source: str, target: str, read_only: bool):
+        mode = "ro" if read_only else "rw"
+        for volume in self.volumes:
+            if volume.source != source:
+                continue
+            if volume.target != target:
+                continue
+            if volume.read_only != read_only:
+                volume.value = f"{source}:{target}:{mode}"
+            return
+        self.volumes.append(f"{source}:{target}:{mode}")
+
 
 class compose_services:
+    KEY = "services"
 
     def __init__(self, root):
         assert isinstance(root, compose_file)
-        services = root.content.get("services", {})
+        root.content.setdefault(self.KEY, {})
+        services = root.content.get(self.KEY)
         assert isinstance(services, Dict)
-        self.__root = root
-        self.__services = {
-            title: compose_service(self.__root, title, value)
-            for title, value in services.items()
+        self.__root: compose_file = root
+        self.__content: Dict[str, Any] = services
+        self.__services: Dict[str, compose_service] = {
+            title: compose_service(self, title) for title in services
         }
 
     def __iter__(self):
@@ -303,6 +412,15 @@ class compose_services:
         if title in self.__services:
             del self.__services[title]
 
+    @property
+    def root(self):
+        return self.__root
+
+    @property
+    def content(self) -> Dict[str, Any]:
+        assert isinstance(self.__content, dict)
+        return self.__content
+
 
 class compose_file:
     '''
@@ -312,45 +430,29 @@ class compose_file:
     3.x: https://docs.docker.com/compose/compose-file/compose-file-v3
     '''
 
-    def __init__(self, project_name: str, compose_file: str):
+    def __init__(self, basedir: str, project_name: str, compose_yaml: str):
+        assert isinstance(basedir, str)
         assert isinstance(project_name, str)
-        assert isinstance(compose_file, str)
+        assert isinstance(compose_yaml, str)
+        self.__basedir = basedir
         self.__project_name = project_name
-        self.__compose_file = compose_file
-        self.__realpath = os.path.realpath(compose_file)
-        self.__dirname = os.path.basename(os.path.dirname(self.__realpath))
-        self.__content: dict = self.__load(compose_file)
-        self.__version: str = self.__content.get("version", "")
-        assert isinstance(self.__version, str)
+        self.__content: Dict[str, Any] = yaml.safe_load(compose_yaml)
         self.__volumes = compose_volumes(self)
         self.__networks = compose_networks(self)
         self.__services = compose_services(self)
-
-    def __load(self, file: str):
-        with open(file, "r", encoding="utf-8") as f:
-            return yaml.safe_load(f)
 
     @property
     def project_name(self) -> str:
         return self.__project_name
 
     @property
-    def compose_file(self) -> str:
-        return self.__compose_file
+    def basedir(self) -> str:
+        return self.__basedir
 
     @property
-    def dirname(self) -> str:
-        return self.__dirname
-
-    @property
-    def content(self) -> Dict:
-        assert isinstance(self.__content, Dict)
+    def content(self) -> Dict[str, Any]:
+        assert isinstance(self.__content, dict)
         return self.__content
-
-    @property
-    def version(self) -> str:
-        assert isinstance(self.__version, str)
-        return self.__version
 
     @property
     def volumes(self) -> compose_volumes:
@@ -363,3 +465,6 @@ class compose_file:
     @property
     def services(self) -> compose_services:
         return self.__services
+
+    def dump(self) -> Dict[str, Any]:
+        return self.content
