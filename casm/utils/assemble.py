@@ -59,7 +59,7 @@ class assemble_variables(Dict[str, str]):
 
 class assemble_file:
     '''
-    assemble.yml
+    assemble file, default assemble.yml
     '''
 
     DEF_CONFIG_FILE = "assemble.yml"
@@ -128,6 +128,6 @@ class assemble_file:
             return path
         return os.path.abspath(os.path.join(self.__basedir, path))
 
-    def dump(self, filepath: Optional[str] = None):
+    def dump_compose(self, filepath: Optional[str] = None):
         safe_dump_file(filepath if isinstance(filepath, str)
                        else self.compose_file, self.compose.dump())

@@ -3,51 +3,46 @@
 from errno import ENOENT
 import os
 from typing import Optional
+from typing import Sequence
 
 from xarg import add_command
 from xarg import argp
 from xarg import commands
 from xarg import run_command
 
+from ...utils import URL_PROG
+from ...utils import __prog_name__
+from ...utils import __version__
 from ...utils import assemble_file
 
-DEF_INSTANCE = "assemble.yml"
+DEF_INSTANCE = assemble_file.DEF_CONFIG_FILE
 
 
-def add_opt_instances(_arg: argp):
-    _arg.add_argument(dest="instance", type=str, nargs="?", metavar="INSTANC",
+@add_command(__prog_name__)
+def add_cmd(_arg: argp):
+    _arg.add_argument("--instance", type=str, nargs=1, metavar="INSTANC",
                       help=f"YAML format config file, default {DEF_INSTANCE}")
-
-
-@add_command("assemble")
-def add_cmd_assemble(_arg: argp):
-    _arg.add_argument("--project-name", type=str, nargs=1, metavar="NAME",
-                      help="Specify project name")
     _arg.add_argument("--template", type=str, nargs=1, metavar="TEMPLATE",
                       help="Specify template file")
     _arg.add_argument("--compose", type=str, nargs=1, metavar="COMPOSE",
                       help="Specify compose file")
+    _arg.add_argument("--project-name", type=str, nargs=1, metavar="NAME",
+                      help="Specify project name")
     _arg.add_opt_on("--mount-timezone", help="Mount host timezone")
     _arg.add_opt_on("--mount-localtime", help="Mount host localtime")
-    add_opt_instances(_arg)
 
 
-@run_command(add_cmd_assemble)
-def run_cmd_assemble(cmds: commands) -> int:
-    instance: Optional[str] = cmds.args.instance
-    if instance is None:
-        instance = DEF_INSTANCE
+@run_command(add_cmd)
+def run_cmd(cmds: commands) -> int:
+    instance: str = DEF_INSTANCE
+    if isinstance(cmds.args.instance, list):
+        instance = cmds.args.instance[0]
     assert isinstance(instance, str)
 
     filepath: str = os.path.abspath(instance)
     if not os.path.isfile(filepath):
         cmds.logger.error(f"No such file '{filepath}'")
         return ENOENT
-
-    project_name: Optional[str] = None
-    if isinstance(cmds.args.project_name, list):
-        project_name = cmds.args.project_name[0]
-    assert isinstance(project_name, str) or project_name is None
 
     template_file: Optional[str] = None
     if isinstance(cmds.args.template, list):
@@ -59,10 +54,14 @@ def run_cmd_assemble(cmds: commands) -> int:
         compose_file = os.path.abspath(cmds.args.compose[0])
     assert isinstance(compose_file, str) or compose_file is None
 
+    project_name: Optional[str] = None
+    if isinstance(cmds.args.project_name, list):
+        project_name = cmds.args.project_name[0]
+    assert isinstance(project_name, str) or project_name is None
+
     cmds.logger.info(f"load '{filepath}'")
-    asmf = assemble_file(filepath, project_name=project_name,
-                         template_file=template_file,
-                         compose_file=compose_file)
+    asmf = assemble_file(filepath, template_file=template_file,
+                         compose_file=compose_file, project_name=project_name)
     # mount host timezone and localtime to container
     for servive in asmf.compose.services:
         if cmds.args.mount_timezone:
@@ -72,5 +71,16 @@ def run_cmd_assemble(cmds: commands) -> int:
 
     cmds.logger.info(f"dump '{asmf.compose_file}'")
     cmds.logger.debug(asmf.compose)
-    asmf.dump()
+    cmds.args.assemble_file = asmf
+    asmf.dump_compose()
     return 0
+
+
+def main(argv: Optional[Sequence[str]] = None) -> int:
+    cmds = commands()
+    cmds.version = __version__
+    return cmds.run(
+        root=add_cmd,
+        argv=argv,
+        description="assemble compose",
+        epilog=f"For more, please visit {URL_PROG}.")
