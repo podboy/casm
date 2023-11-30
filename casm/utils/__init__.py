@@ -10,9 +10,10 @@ from .compose import compose_volume
 from .compose import compose_volumes
 from .compose import service_volume
 from .compose import service_volumes
-from .podman import disable_service
-from .podman import enable_service
-from .podman import stop_service
+from .podman import disable_service as podman_disable_service
+from .podman import enable_service as podman_enable_service
+from .podman import stop_service as podman_stop_service
+from .podman_compose import pull as podman_compose_pull
 
 __package_name__ = "casm"
 __prog_name__ = "casm"

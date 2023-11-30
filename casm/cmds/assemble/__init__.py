@@ -14,6 +14,7 @@ from ...utils import URL_PROG
 from ...utils import __prog_name__
 from ...utils import __version__
 from ...utils import assemble_file
+from .pull import add_cmd_pull
 from .service import add_cmd_services
 from .systemd import add_cmd_disable
 from .systemd import add_cmd_enable
@@ -36,7 +37,8 @@ def add_cmd(_arg: argp):
     _arg.add_opt_on("--systemd", help="Control via systemctl")
 
 
-@run_command(add_cmd, add_cmd_services, add_cmd_enable, add_cmd_disable)
+@run_command(add_cmd, add_cmd_pull, add_cmd_services,
+             add_cmd_enable, add_cmd_disable)
 def run_cmd(cmds: commands) -> int:
     instance: str = DEF_INSTANCE
     if isinstance(cmds.args.instance, list):

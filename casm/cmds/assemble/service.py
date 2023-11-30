@@ -1,5 +1,7 @@
 # coding:utf-8
 
+from typing import List
+
 from xarg import add_command
 from xarg import argp
 from xarg import commands
@@ -11,6 +13,11 @@ from ...utils import assemble_file
 def add_opt_services(_arg: argp):
     _arg.add_argument(dest="services", type=str, nargs="*", metavar="SERVICE",
                       action="extend", help="Specify services, default ALL")
+
+
+def filter_services(assemble: assemble_file, services: List[str]) -> List[str]:
+    names: List[str] = [s.title for s in assemble.compose.services]
+    return [s for s in names if s in services]
 
 
 @add_command("services", help="List all services")

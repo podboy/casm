@@ -9,8 +9,8 @@ from xarg import run_command
 
 from ...utils import assemble_file
 from ...utils import compose_service
-from ...utils import disable_service
-from ...utils import enable_service
+from ...utils import podman_disable_service
+from ...utils import podman_enable_service
 from .service import add_opt_services
 
 
@@ -31,7 +31,7 @@ def run_cmd_enable(cmds: commands) -> int:
             continue
         container_name = assemble.safe_substitute(service.container_name)
         cmds.logger.info(f"enable container {container_name}")
-        enable_service(container_name)
+        podman_enable_service(container_name)
     return 0
 
 
@@ -52,5 +52,5 @@ def run_cmd_disable(cmds: commands) -> int:
             continue
         container_name = assemble.safe_substitute(service.container_name)
         cmds.logger.info(f"disable container {container_name}")
-        disable_service(container_name)
+        podman_disable_service(container_name)
     return 0
