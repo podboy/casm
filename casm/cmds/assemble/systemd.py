@@ -11,14 +11,10 @@ from ...utils import assemble_file
 from ...utils import compose_service
 from ...utils import disable_service
 from ...utils import enable_service
+from .service import add_opt_services
 
 
-def add_opt_services(_arg: argp):
-    _arg.add_argument(dest="services", type=str, nargs="*", metavar="SERVICE",
-                      action="extend", help="Specify services, default ALL")
-
-
-@add_command("enable", help="enable systemd for containers")
+@add_command("enable", help="Enable systemd for containers")
 def add_cmd_enable(_arg: argp):
     add_opt_services(_arg)
 
@@ -39,7 +35,7 @@ def run_cmd_enable(cmds: commands) -> int:
     return 0
 
 
-@add_command("disable", help="disable systemd for containers")
+@add_command("disable", help="Disable systemd for containers")
 def add_cmd_disable(_arg: argp):
     add_opt_services(_arg)
 
