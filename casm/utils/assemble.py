@@ -69,12 +69,18 @@ class assemble_file:
     KEY_TEMPLATE_FILE = "template-file"
     KEY_COMPOSE_FILE = "compose-file"
 
-    def __init__(self, filepath: str = DEF_CONFIG_FILE):
+    def __init__(self, filepath: str = DEF_CONFIG_FILE,
+                 template_file: Optional[str] = None,
+                 compose_file: Optional[str] = None):
         assert isinstance(filepath, str)
+        assert isinstance(template_file, str) or template_file is None
+        assert isinstance(compose_file, str) or compose_file is None
+        self.__abspath = os.path.abspath(filepath)
+        self.__basedir = os.path.dirname(self.__abspath)
         self.__filepath = filepath
-        self.__projname = default_project_name(filepath)
-        self.__realpath = os.path.realpath(filepath)
-        self.__basedir = os.path.dirname(self.__realpath)
+        self.__template_file = template_file
+        self.__compose_file = compose_file
+        self.__project_name = default_project_name(filepath)
         self.__assemble: Dict[str, Any] = safe_load_yaml(self.__filepath)
         vars: Dict[str, Any] = self.__assemble.get(self.KEY_VARIABLES, {})
         self.__variables: Dict[str, Any] = assemble_variables(vars)
@@ -83,21 +89,32 @@ class assemble_file:
 
     @property
     def project_name(self) -> str:
-        return self.__assemble.get(self.KEY_PROJECT_NAME, self.__projname)
+        return self.__assemble.get(self.KEY_PROJECT_NAME, self.__project_name)
 
     @property
     def template_file(self) -> str:
-        return self.__assemble.get(self.KEY_TEMPLATE_FILE,
-                                   self.DEF_TEMPLATE_FILE)
+        if self.__template_file is not None:
+            return self.abspath(self.__template_file)
+        path: str = self.__assemble.get(self.KEY_TEMPLATE_FILE,
+                                        self.DEF_TEMPLATE_FILE)
+        return self.abspath(path)
 
     @property
     def compose_file(self) -> str:
-        return self.__assemble.get(self.KEY_COMPOSE_FILE,
-                                   self.DEF_COMPOSE_FILE)
+        if self.__compose_file is not None:
+            return self.abspath(self.__compose_file)
+        path: str = self.__assemble.get(self.KEY_COMPOSE_FILE,
+                                        self.DEF_COMPOSE_FILE)
+        return self.abspath(path)
 
     @property
     def compose(self) -> compose:
         return self.__compose
+
+    def abspath(self, path: str) -> str:
+        if os.path.isabs(path):
+            return path
+        return os.path.abspath(os.path.join(self.__basedir, path))
 
     def dump(self, filepath: Optional[str] = None):
         safe_dump_yaml(filepath if isinstance(filepath, str)

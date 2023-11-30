@@ -10,14 +10,14 @@ import yaml
 
 def safe_load_tmpl(filepath: str, variables: Dict[str, str]) -> str:
     assert type(filepath) is str
-    assert os.path.isfile(filepath)
+    assert os.path.isfile(filepath), f"No such file '{filepath}'"
     with open(filepath, "r", encoding="utf-8") as handle:
         return Template(handle.read()).substitute(variables)
 
 
 def safe_load_yaml(filepath: str) -> Any:
     assert isinstance(filepath, str)
-    assert os.path.isfile(filepath)
+    assert os.path.isfile(filepath), f"No such file '{filepath}'"
     with open(filepath, "r", encoding="utf-8") as stream:
         return yaml.safe_load(stream)
 
