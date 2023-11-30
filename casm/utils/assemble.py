@@ -22,6 +22,7 @@ def default_project_name(filepath: str):
 
 
 class assemble_variables(Dict[str, str]):
+    KEY_PROJECT_NAME = "COMPOSE_PROJECT_NAME"
 
     def __init__(self, variables: Dict[str, str]):
         assert isinstance(variables, dict)
@@ -70,9 +71,12 @@ class assemble_file:
     KEY_COMPOSE_FILE = "compose-file"
 
     def __init__(self, filepath: str = DEF_CONFIG_FILE,
+                 project_name: Optional[str] = None,
                  template_file: Optional[str] = None,
                  compose_file: Optional[str] = None):
         assert isinstance(filepath, str)
+        if project_name is None:
+            project_name = default_project_name(filepath)
         assert isinstance(template_file, str) or template_file is None
         assert isinstance(compose_file, str) or compose_file is None
         self.__abspath = os.path.abspath(filepath)
@@ -80,8 +84,11 @@ class assemble_file:
         self.__filepath = filepath
         self.__template_file = template_file
         self.__compose_file = compose_file
-        self.__project_name = default_project_name(filepath)
         self.__assemble: Dict[str, Any] = safe_load_yaml(self.__filepath)
+        self.__project_name: str = self.__assemble.get(self.KEY_PROJECT_NAME,
+                                                       project_name)
+        assert isinstance(self.__project_name, str)
+        os.environ[assemble_variables.KEY_PROJECT_NAME] = self.__project_name
         vars: Dict[str, Any] = self.__assemble.get(self.KEY_VARIABLES, {})
         self.__variables: Dict[str, Any] = assemble_variables(vars)
         tmpl: str = safe_load_tmpl(self.template_file, self.__variables)
@@ -89,7 +96,7 @@ class assemble_file:
 
     @property
     def project_name(self) -> str:
-        return self.__assemble.get(self.KEY_PROJECT_NAME, self.__project_name)
+        return self.__project_name
 
     @property
     def template_file(self) -> str:

@@ -21,12 +21,14 @@ def add_opt_instances(_arg: argp):
 
 @add_command("assemble")
 def add_cmd_assemble(_arg: argp):
-    _arg.add_opt_on("--mount-timezone")
-    _arg.add_opt_on("--mount-localtime")
+    _arg.add_argument("--project-name", type=str, nargs=1, metavar="NAME",
+                      help="Specify project name")
     _arg.add_argument("--template", type=str, nargs=1, metavar="TEMPLATE",
-                      help="Specify an alternate template file")
+                      help="Specify template file")
     _arg.add_argument("--compose", type=str, nargs=1, metavar="COMPOSE",
-                      help="Specify an alternate compose file")
+                      help="Specify compose file")
+    _arg.add_opt_on("--mount-timezone", help="Mount host timezone")
+    _arg.add_opt_on("--mount-localtime", help="Mount host localtime")
     add_opt_instances(_arg)
 
 
@@ -42,6 +44,11 @@ def run_cmd_assemble(cmds: commands) -> int:
         cmds.logger.error(f"No such file '{filepath}'")
         return ENOENT
 
+    project_name: Optional[str] = None
+    if isinstance(cmds.args.project_name, list):
+        project_name = cmds.args.project_name[0]
+    assert isinstance(project_name, str) or project_name is None
+
     template_file: Optional[str] = None
     if isinstance(cmds.args.template, list):
         template_file = os.path.abspath(cmds.args.template[0])
@@ -53,7 +60,8 @@ def run_cmd_assemble(cmds: commands) -> int:
     assert isinstance(compose_file, str) or compose_file is None
 
     cmds.logger.info(f"load '{filepath}'")
-    asmf = assemble_file(filepath, template_file=template_file,
+    asmf = assemble_file(filepath, project_name=project_name,
+                         template_file=template_file,
                          compose_file=compose_file)
     # mount host timezone and localtime to container
     for servive in asmf.compose.services:
