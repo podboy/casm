@@ -1,30 +1,27 @@
 # coding:utf-8
 
 import os
-from string import Template
 from typing import Any
-from typing import Dict
 
 import yaml
 
 
-def safe_load_tmpl(filepath: str, variables: Dict[str, str]) -> str:
-    assert type(filepath) is str
-    assert os.path.isfile(filepath), f"No such file '{filepath}'"
-    with open(filepath, "r", encoding="utf-8") as handle:
-        return Template(handle.read()).substitute(variables)
-
-
-def safe_load_yaml(filepath: str) -> Any:
+def safe_load_data(filepath: str) -> str:
     assert isinstance(filepath, str)
     assert os.path.isfile(filepath), f"No such file '{filepath}'"
     with open(filepath, "r", encoding="utf-8") as stream:
-        return yaml.safe_load(stream)
+        return stream.read()
 
 
-def safe_dump_yaml(filepath: str, data: Any):
+def safe_load_file(filepath: str) -> Any:
+    return yaml.safe_load(safe_load_data(filepath))
+
+
+def safe_dump_data(data: Any) -> str:
+    return yaml.safe_dump(data, allow_unicode=True, indent=2, sort_keys=False)
+
+
+def safe_dump_file(filepath: str, data: Any):
     assert isinstance(filepath, str)
     with open(filepath, "w", encoding="utf-8") as stream:
-        dump: str = yaml.safe_dump(data, allow_unicode=True,
-                                   indent=2, sort_keys=False)
-        stream.write(dump)
+        stream.write(safe_dump_data(data))

@@ -9,9 +9,9 @@ from typing import Optional
 from podman_compose import norm_re
 
 from .compose import compose_file as compose
-from .yaml import safe_dump_yaml
-from .yaml import safe_load_tmpl
-from .yaml import safe_load_yaml
+from .yaml import safe_dump_file
+from .yaml import safe_load_data
+from .yaml import safe_load_file
 
 
 def default_project_name(filepath: str):
@@ -38,6 +38,7 @@ class assemble_variables(Dict[str, str]):
         for k, v in vars.items():
             assert isinstance(k, str), f"{type(k)} not str"
             assert isinstance(v, str), f"{type(v)} not str"
+            os.environ[k] = v
         self.__variables = vars
 
     def __iter__(self):
@@ -84,14 +85,14 @@ class assemble_file:
         self.__filepath = filepath
         self.__template_file = template_file
         self.__compose_file = compose_file
-        self.__assemble: Dict[str, Any] = safe_load_yaml(self.__filepath)
+        self.__assemble: Dict[str, Any] = safe_load_file(self.__filepath)
         self.__project_name: str = self.__assemble.get(self.KEY_PROJECT_NAME,
                                                        project_name)
         assert isinstance(self.__project_name, str)
         os.environ[assemble_variables.KEY_PROJECT_NAME] = self.__project_name
-        vars: Dict[str, Any] = self.__assemble.get(self.KEY_VARIABLES, {})
-        self.__variables: Dict[str, Any] = assemble_variables(vars)
-        tmpl: str = safe_load_tmpl(self.template_file, self.__variables)
+        vars: Dict[str, str] = self.__assemble.get(self.KEY_VARIABLES, {})
+        self.__variables: Dict[str, str] = assemble_variables(vars)
+        tmpl: str = safe_load_data(self.template_file)
         self.__compose = compose(self.__basedir, self.project_name, tmpl)
 
     @property
@@ -115,6 +116,10 @@ class assemble_file:
         return self.abspath(path)
 
     @property
+    def variables(self) -> Dict[str, str]:
+        return self.__variables
+
+    @property
     def compose(self) -> compose:
         return self.__compose
 
@@ -124,5 +129,5 @@ class assemble_file:
         return os.path.abspath(os.path.join(self.__basedir, path))
 
     def dump(self, filepath: Optional[str] = None):
-        safe_dump_yaml(filepath if isinstance(filepath, str)
+        safe_dump_file(filepath if isinstance(filepath, str)
                        else self.compose_file, self.compose.dump())
