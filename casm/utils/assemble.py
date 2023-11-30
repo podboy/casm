@@ -39,22 +39,21 @@ class assemble_variables(Dict[str, str]):
             assert isinstance(k, str), f"{type(k)} not str"
             assert isinstance(v, str), f"{type(v)} not str"
             os.environ[k] = v
-        self.__variables = vars
 
     def __iter__(self):
-        return iter(self.__variables.keys())
+        return iter(os.environ.keys())
 
     def __getitem__(self, key: str) -> Optional[str]:
-        return self.__variables.get(key, None)
+        return os.environ.get(key, None)
 
     def __setitem__(self, key: str, value: str):
         assert isinstance(value, str), f"{type(value)} not str"
-        value = Template(value).safe_substitute(self.__variables)
-        self.__variables[key] = value
+        value = Template(value).safe_substitute(os.environ)
+        os.environ[key] = value
 
     def __delitem__(self, key: str):
-        if key in self.__variables:
-            del self.__variables[key]
+        if key in os.environ:
+            del os.environ[key]
 
 
 class assemble_file:
