@@ -90,7 +90,7 @@ class assemble_file:
         assert isinstance(self.__project_name, str)
         os.environ[assemble_variables.KEY_PROJECT_NAME] = self.__project_name
         vars: Dict[str, str] = self.__assemble.get(self.KEY_VARIABLES, {})
-        self.__variables: Dict[str, str] = assemble_variables(vars)
+        self.__variables: assemble_variables = assemble_variables(vars)
         tmpl: str = safe_load_data(self.template_file)
         self.__compose = compose(self.__basedir, self.project_name, tmpl)
 
@@ -101,21 +101,21 @@ class assemble_file:
     @property
     def template_file(self) -> str:
         if self.__template_file is not None:
-            return self.abspath(self.__template_file)
+            return self.abspath(self.safe_substitute(self.__template_file))
         path: str = self.__assemble.get(self.KEY_TEMPLATE_FILE,
                                         self.DEF_TEMPLATE_FILE)
-        return self.abspath(path)
+        return self.abspath(self.safe_substitute(path))
 
     @property
     def compose_file(self) -> str:
         if self.__compose_file is not None:
-            return self.abspath(self.__compose_file)
+            return self.abspath(self.safe_substitute(self.__compose_file))
         path: str = self.__assemble.get(self.KEY_COMPOSE_FILE,
                                         self.DEF_COMPOSE_FILE)
-        return self.abspath(path)
+        return self.abspath(self.safe_substitute(path))
 
     @property
-    def variables(self) -> Dict[str, str]:
+    def variables(self) -> assemble_variables:
         return self.__variables
 
     @property
@@ -126,6 +126,12 @@ class assemble_file:
         if os.path.isabs(path):
             return path
         return os.path.abspath(os.path.join(self.__basedir, path))
+
+    def substitute(self, value: str) -> str:
+        return Template(value).substitute(self.variables)
+
+    def safe_substitute(self, value: str) -> str:
+        return Template(value).safe_substitute(self.variables)
 
     def dump_compose(self, filepath: Optional[str] = None):
         safe_dump_file(filepath if isinstance(filepath, str)

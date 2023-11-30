@@ -10,10 +10,13 @@ from .compose import compose_volume
 from .compose import compose_volumes
 from .compose import service_volume
 from .compose import service_volumes
+from .podman import disable_service
+from .podman import enable_service
+from .podman import stop_service
 
 __package_name__ = "casm"
 __prog_name__ = "casm"
 __prog_compose__ = f"{__prog_name__}-compose"
-__version__ = "0.1.alpha.5"
+__version__ = "0.1.alpha.6"
 
 URL_PROG = "https://github.com/podboy/casm"

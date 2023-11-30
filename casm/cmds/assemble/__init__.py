@@ -14,6 +14,8 @@ from ...utils import URL_PROG
 from ...utils import __prog_name__
 from ...utils import __version__
 from ...utils import assemble_file
+from .systemd import add_cmd_disable
+from .systemd import add_cmd_enable
 
 DEF_INSTANCE = assemble_file.DEF_CONFIG_FILE
 
@@ -32,7 +34,7 @@ def add_cmd(_arg: argp):
     _arg.add_opt_on("--mount-localtime", help="Mount host localtime")
 
 
-@run_command(add_cmd)
+@run_command(add_cmd, add_cmd_enable, add_cmd_disable)
 def run_cmd(cmds: commands) -> int:
     instance: str = DEF_INSTANCE
     if isinstance(cmds.args.instance, list):
@@ -70,7 +72,7 @@ def run_cmd(cmds: commands) -> int:
             servive.mount("/etc/localtime", "/etc/localtime", True)
 
     cmds.logger.info(f"dump '{asmf.compose_file}'")
-    cmds.logger.debug(asmf.compose)
+    cmds.logger.debug(asmf.compose.dump())
     cmds.args.assemble_file = asmf
     asmf.dump_compose()
     return 0
