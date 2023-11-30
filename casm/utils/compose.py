@@ -22,6 +22,8 @@ def default_project_name(basedir: str):
 
 
 class compose_volume:
+    KEY_NAME = "name"
+    KEY_EXTERNAL = "external"
 
     def __init__(self, volumes, title: str):
         assert isinstance(volumes, compose_volumes)
@@ -54,13 +56,13 @@ class compose_volume:
 
     @property
     def name(self) -> Optional[str]:
-        name = self.__value.get("name", None)
+        name = self.__value.get(self.KEY_NAME, None)
         assert isinstance(name, str) or name is None
         return name
 
     @property
     def external(self) -> Optional[Dict]:
-        external = self.__value.get("external", None)
+        external = self.__value.get(self.KEY_EXTERNAL, None)
         assert isinstance(external, Dict) or external is None
         return external
 
@@ -181,6 +183,11 @@ class service_volume:
     https://docs.docker.com/compose/compose-file/compose-file-v3/#long-syntax-3
     '''
 
+    KEY_TYPE = "type"
+    KEY_SOURCE = "source"
+    KEY_TARGET = "target"
+    KEY_READ_ONLY = "read_only"
+
     def __init__(self, volumes, value: Union[str, Dict[str, Any]]):
         assert isinstance(volumes, service_volumes)
         assert isinstance(value, str) or isinstance(value, dict)
@@ -253,19 +260,19 @@ class service_volume:
         '''
         "bind", "volume"
         '''
-        type = self.generic.get("type", None)
+        type = self.generic.get(self.KEY_TYPE, None)
         assert isinstance(type, str)
         return type
 
     @property
     def source(self) -> str:
-        source = self.generic.get("source", None)
+        source = self.generic.get(self.KEY_SOURCE, None)
         assert isinstance(source, str)
         return source
 
     @property
     def target(self) -> str:
-        target = self.generic.get("target", None)
+        target = self.generic.get(self.KEY_TARGET, None)
         assert isinstance(target, str)
         return target
 
@@ -274,7 +281,7 @@ class service_volume:
         '''
         default read-write(rw)
         '''
-        read_only = self.generic.get("read_only", False)
+        read_only = self.generic.get(self.KEY_READ_ONLY, False)
         assert isinstance(read_only, bool)
         return read_only
 
@@ -315,6 +322,7 @@ class service_volumes:
 
 class service_deploy:
     KEY = "deploy"
+    KEY_REPLICAS = "replicas"
 
     def __init__(self, service):
         assert isinstance(service, compose_service)
@@ -330,10 +338,12 @@ class service_deploy:
 
     @property
     def replicas(self) -> int:
-        return int(self.__content.get("replicas", 1))
+        return int(self.__content.get(self.KEY_REPLICAS, 1))
 
 
 class compose_service:
+    KEY_CONTAINER_NAME = "container_name"
+    KEY_RESTART = "restart"
 
     def __init__(self, services, title: str):
         assert isinstance(services, compose_services)
@@ -373,10 +383,19 @@ class compose_service:
         podman_compose._parse_compose_file()
         '''
         project_name = self.__root.project_name
-        default_name = f"{project_name}_{self.title}_{self.deploy.replicas}"
-        container_name = self.__value.get("container_name", default_name)
-        assert isinstance(container_name, str)
-        return container_name if self.deploy.replicas == 1 else default_name
+        default = f"{project_name}_{self.title}_{self.deploy.replicas}"
+        name = self.__value.get(self.KEY_CONTAINER_NAME, default)
+        assert isinstance(name, str)
+        return name if self.deploy.replicas == 1 else default
+
+    @property
+    def restart(self) -> str:
+        return self.__value.get(self.KEY_RESTART, "no")
+
+    @restart.setter
+    def restart(self, value: str):
+        assert value in {"no", "always", "on-failure", "unless-stopped"}
+        self.__value[self.KEY_RESTART] = value
 
     @property
     def volumes(self) -> service_volumes:

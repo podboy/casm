@@ -32,6 +32,7 @@ def add_cmd(_arg: argp):
                       help="Specify project name")
     _arg.add_opt_on("--mount-timezone", help="Mount host timezone")
     _arg.add_opt_on("--mount-localtime", help="Mount host localtime")
+    _arg.add_opt_on("--systemd", help="Control via systemctl")
 
 
 @run_command(add_cmd, add_cmd_enable, add_cmd_disable)
@@ -64,12 +65,16 @@ def run_cmd(cmds: commands) -> int:
     cmds.logger.info(f"load '{filepath}'")
     asmf = assemble_file(filepath, template_file=template_file,
                          compose_file=compose_file, project_name=project_name)
-    # mount host timezone and localtime to container
+
     for servive in asmf.compose.services:
+        # mount host timezone and localtime to container
         if cmds.args.mount_timezone:
             servive.mount("/etc/timezone", "/etc/timezone", True)
         if cmds.args.mount_localtime:
             servive.mount("/etc/localtime", "/etc/localtime", True)
+        # restart via systemd
+        if cmds.args.systemd and servive.restart != "no":
+            servive.restart = "no"
 
     cmds.logger.info(f"dump '{asmf.compose_file}'")
     cmds.logger.debug(asmf.compose.dump())
