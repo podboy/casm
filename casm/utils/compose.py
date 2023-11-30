@@ -313,9 +313,29 @@ class service_volumes:
         self.__content.append(value)
 
 
+class service_deploy:
+    KEY = "deploy"
+
+    def __init__(self, service):
+        assert isinstance(service, compose_service)
+        service.value.setdefault(self.KEY, {})
+        deploy = service.value.get(self.KEY)
+        assert isinstance(deploy, dict)
+        self.__service: compose_service = service
+        self.__content: Dict[str, Any] = deploy
+
+    @property
+    def service(self):
+        return self.__service
+
+    @property
+    def replicas(self) -> int:
+        return int(self.__content.get("replicas", 1))
+
+
 class compose_service:
 
-    def __init__(self, services, title: str, replica: int = 1):
+    def __init__(self, services, title: str):
         assert isinstance(services, compose_services)
         services.content.setdefault(title, {})
         if services.content[title] is None:
@@ -327,8 +347,8 @@ class compose_service:
         self.__services: compose_services = services
         self.__title: str = title
         self.__value: Dict[str, Any] = value
-        self.__replica: int = replica
         self.__volumes = service_volumes(self)
+        self.__deploy = service_deploy(self)
 
     @property
     def root(self):
@@ -347,20 +367,16 @@ class compose_service:
         return self.__value
 
     @property
-    def replica(self) -> int:
-        return self.__replica
-
-    @property
     def container_name(self) -> str:
         '''
         Same as container_names_by_service in
         podman_compose._parse_compose_file()
         '''
         project_name = self.__root.project_name
-        default_name = f"{project_name}_{self.title}_{self.replica}"
+        default_name = f"{project_name}_{self.title}_{self.deploy.replicas}"
         container_name = self.__value.get("container_name", default_name)
         assert isinstance(container_name, str)
-        return container_name if self.replica == 1 else default_name
+        return container_name if self.deploy.replicas == 1 else default_name
 
     @property
     def volumes(self) -> service_volumes:
@@ -370,6 +386,10 @@ class compose_service:
     def volumes(self, value: service_volumes):
         if isinstance(value, service_volumes):
             self.__volumes = value
+
+    @property
+    def deploy(self) -> service_deploy:
+        return self.__deploy
 
     def mount(self, source: str, target: str, read_only: bool):
         mode = "ro" if read_only else "rw"
