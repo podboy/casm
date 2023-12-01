@@ -34,11 +34,13 @@ def run_cmd_services(cmds: commands) -> int:
     assemble: assemble_file = cmds.args.assemble_file
     assert isinstance(assemble, assemble_file)
     for service in assemble.compose.services:
+        service_name: str = assemble.safe_substitute(service.title)
+        container_name: str = assemble.safe_substitute(service.container_name)
         if cmds.args.service_name:
-            cmds.stdout(service.title)
+            cmds.stdout(service_name)
             continue
         if cmds.args.container_name:
-            cmds.stdout(service.container_name)
+            cmds.stdout(container_name)
             continue
-        cmds.stdout(f"{service.title}: {service.container_name}")
+        cmds.stdout(f"{service_name}: {container_name}")
     return 0
