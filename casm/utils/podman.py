@@ -30,6 +30,9 @@ def enable_service(name: str) -> int:
 def disable_service(name: str) -> int:
     assert isinstance(name, str)
     service_name = SERVICE_NAME.format(name=name)
+    errno = os.system(f"systemctl stop {service_name}")
+    if errno != 0:
+        return errno
     errno = os.system(f"systemctl disable {service_name}")
     if errno != 0:
         return errno
