@@ -8,7 +8,7 @@ from xarg import commands
 from xarg import run_command
 
 from ...utils import assemble_file
-from ...utils import podman_compose_unpause
+from ...utils import podman_compose_cmd
 from .service import add_opt_services
 from .service import filter_services
 
@@ -23,4 +23,4 @@ def run_cmd_unpause(cmds: commands) -> int:
     assemble: assemble_file = cmds.args.assemble_file
     assert isinstance(assemble, assemble_file)
     services: List[str] = filter_services(assemble, cmds.args.services)
-    return podman_compose_unpause(assemble.compose_file, *services)
+    return podman_compose_cmd(assemble.compose_file).unpause(*services)
