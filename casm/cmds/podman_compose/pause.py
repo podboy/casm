@@ -9,13 +9,13 @@ from xarg import run_command
 
 from ...utils import assemble_file
 from ...utils import podman_compose_cmd
-from ..service import add_opt_services
+from ..service import add_pos_services
 from ..service import filter_services
 
 
 @add_command("pause", help="Pause running services")
 def add_cmd_pause(_arg: argp):
-    add_opt_services(_arg)
+    add_pos_services(_arg)
 
 
 @run_command(add_cmd_pause)
@@ -23,4 +23,4 @@ def run_cmd_pause(cmds: commands) -> int:
     assemble: assemble_file = cmds.args.assemble_file
     assert isinstance(assemble, assemble_file)
     services: List[str] = filter_services(assemble, cmds.args.services)
-    return podman_compose_cmd(assemble.compose_file).pause(*services)
+    return podman_compose_cmd(assemble.compose_file).pause(services)

@@ -1,6 +1,7 @@
 # coding:utf-8
 
 from .down import add_cmd_down
+from .exec import add_cmd_exec
 from .logs import add_cmd_logs
 from .pause import add_cmd_pause
 from .pull import add_cmd_pull

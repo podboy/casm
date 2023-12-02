@@ -10,7 +10,7 @@ from xarg import run_command
 from ..utils import assemble_file
 
 
-def add_opt_services(_arg: argp):
+def add_pos_services(_arg: argp):
     _arg.add_argument(dest="services", type=str, nargs="*", metavar="SERVICE",
                       action="extend", help="Specify services, default ALL")
 

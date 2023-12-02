@@ -10,12 +10,12 @@ from xarg import run_command
 from ...utils import assemble_file
 from ...utils import podman_disable_service
 from ...utils import podman_enable_service
-from ..service import add_opt_services
+from ..service import add_pos_services
 
 
 @add_command("enable", help="Enable systemd for containers")
 def add_cmd_enable(_arg: argp):
-    add_opt_services(_arg)
+    add_pos_services(_arg)
 
 
 @run_command(add_cmd_enable)
@@ -35,7 +35,7 @@ def run_cmd_enable(cmds: commands) -> int:
 
 @add_command("disable", help="Disable systemd for containers")
 def add_cmd_disable(_arg: argp):
-    add_opt_services(_arg)
+    add_pos_services(_arg)
 
 
 @run_command(add_cmd_disable)

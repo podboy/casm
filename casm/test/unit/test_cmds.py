@@ -128,6 +128,28 @@ class Test_cmds(unittest.TestCase):
         mock_system.assert_called_once_with(cmd)
 
     @mock.patch.object(os, "system")
+    def test_exec(self, mock_system: mock.Mock):
+        mock_system.side_effect = [0]
+        cmds: List[str] = ["--template", self.template,
+                           "--compose", self.compose,
+                           "exec", "worker", "bash"]
+        self.assertEqual(main(cmds), 0)
+        cmd = f"podman-compose --file {self.file} exec worker bash"
+        mock_system.assert_called_once_with(cmd)
+
+    @mock.patch.object(os, "system")
+    def test_exec_opt(self, mock_system: mock.Mock):
+        mock_system.side_effect = [0]
+        cmds: List[str] = ["--template", self.template,
+                           "--compose", self.compose,
+                           "exec", "--detach", "--privileged", "--user=test",
+                           "-T", "--index=1", "worker"]
+        self.assertEqual(main(cmds), 0)
+        cmd = f"podman-compose --file {self.file} exec "\
+            "--detach --privileged --user test -T --index 1 worker"
+        mock_system.assert_called_once_with(cmd)
+
+    @mock.patch.object(os, "system")
     def test_logs(self, mock_system: mock.Mock):
         mock_system.side_effect = [0]
         cmds: List[str] = ["--template", self.template,

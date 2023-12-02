@@ -32,35 +32,53 @@ class podman_compose_cmd:
         cmds.extend([i for i in args if len(i) > 0])
         return exec(*cmds)
 
-    def pull(self, *services: str) -> int:
+    def pull(self, services: List[str]) -> int:
         return self.run("pull", *services)
 
-    def up(self, *services: str, detach: bool = False) -> int:
+    def up(self, services: List[str], detach: bool = False) -> int:
         cmds: List[str] = ["up"]
         if detach:
             cmds.append("--detach")
         cmds.extend(services)
         return self.run(*cmds)
 
-    def down(self, *services: str) -> int:
+    def down(self, services: List[str]) -> int:
         return self.run("down", *services)
 
-    def start(self, *services: str) -> int:
+    def start(self, services: List[str]) -> int:
         return self.run("start", *services)
 
-    def stop(self, *services: str) -> int:
+    def stop(self, services: List[str]) -> int:
         return self.run("stop", *services)
 
-    def restart(self, *services: str) -> int:
+    def restart(self, services: List[str]) -> int:
         return self.run("restart", *services)
 
-    def pause(self, *services: str) -> int:
+    def pause(self, services: List[str]) -> int:
         return self.run("pause", *services)
 
-    def unpause(self, *services: str) -> int:
+    def unpause(self, services: List[str]) -> int:
         return self.run("unpause", *services)
 
-    def logs(self, *services: str, follow: bool = False,
+    def exec(self, service: str, arguments: List[str], detach: bool = False,
+             privileged: bool = False, user: Optional[str] = None,
+             T: bool = False, index: Optional[int] = None) -> int:
+        cmds: List[str] = ["exec"]
+        if detach:
+            cmds.append("--detach")
+        if privileged:
+            cmds.append("--privileged")
+        if isinstance(user, str):
+            cmds.append(f"--user {user}")
+        if T:
+            cmds.append("-T")
+        if isinstance(index, int):
+            cmds.append(f"--index {index}")
+        cmds.append(service)
+        cmds.extend(arguments)
+        return self.run(*cmds)
+
+    def logs(self, services: List[str], follow: bool = False,
              tail: Optional[int] = None) -> int:
         cmds: List[str] = ["logs"]
         if follow:
