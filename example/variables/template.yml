@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  web:
+    image: "nginx:alpine"
+    networks:
+      - new
+
+  worker:
+    image: "my-worker-image:latest"
+    networks:
+      - legacy
+
+  db:
+    image: mysql
+    networks:
+      new:
+        aliases:
+          - database
+      legacy:
+        aliases:
+          - mysql
+
+networks:
+  new:
+  legacy:

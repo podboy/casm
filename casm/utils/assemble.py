@@ -16,7 +16,7 @@ from .yaml import safe_load_file
 
 def default_project_name(filepath: str):
     assert isinstance(filepath, str)
-    assert os.path.isfile(filepath)
+    # assert os.path.isfile(filepath)
     basename, _ = os.path.basename(filepath).split(".", 1)
     return norm_re.sub("", basename.lower())
 
@@ -24,7 +24,9 @@ def default_project_name(filepath: str):
 class assemble_variables(Dict[str, str]):
     KEY_PROJECT_NAME = "COMPOSE_PROJECT_NAME"
 
-    def __init__(self, variables: Dict[str, str]):
+    def __init__(self, variables: Optional[Dict[str, str]]):
+        if variables is None:
+            variables = dict()
         assert isinstance(variables, dict)
         vars = {k: v for k, v in os.environ.items()}
         for k, v in variables.items():
@@ -62,7 +64,7 @@ class assemble_file:
     '''
 
     DEF_CONFIG_FILE = "assemble.yml"
-    DEF_TEMPLATE_FILE = "compose.yml"
+    DEF_TEMPLATE_FILE = "template.yml"
     DEF_COMPOSE_FILE = "docker-compose.yml"
 
     KEY_VARIABLES = "variables"
@@ -84,7 +86,8 @@ class assemble_file:
         self.__filepath = filepath
         self.__template_file = template_file
         self.__compose_file = compose_file
-        self.__assemble: Dict[str, Any] = safe_load_file(self.__filepath)
+        data = safe_load_file(filepath) if os.path.isfile(filepath) else dict()
+        self.__assemble: Dict[str, Any] = dict() if data is None else data
         self.__project_name: str = self.__assemble.get(self.KEY_PROJECT_NAME,
                                                        project_name)
         assert isinstance(self.__project_name, str)

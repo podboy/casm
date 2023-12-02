@@ -1,0 +1,6 @@
+version: "3.8"
+
+services:
+  worker:
+    image: "my-worker-image:latest"
+    container_name: ${COMPOSE_PROJECT_NAME}-worker

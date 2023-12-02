@@ -54,7 +54,7 @@ def run_cmd(cmds: commands) -> int:
     assert isinstance(instance, str)
 
     filepath: str = os.path.abspath(instance)
-    if not os.path.isfile(filepath):
+    if os.path.exists(filepath) and not os.path.isfile(filepath):
         cmds.logger.error(f"No such file '{filepath}'")
         return ENOENT
 
