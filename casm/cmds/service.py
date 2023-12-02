@@ -7,7 +7,7 @@ from xarg import argp
 from xarg import commands
 from xarg import run_command
 
-from ...utils import assemble_file
+from ..utils import assemble_file
 
 
 def add_opt_services(_arg: argp):

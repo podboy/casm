@@ -9,8 +9,8 @@ from xarg import run_command
 
 from ...utils import assemble_file
 from ...utils import podman_compose_cmd
-from .service import add_opt_services
-from .service import filter_services
+from ..service import add_opt_services
+from ..service import filter_services
 
 
 @add_command("up", help="Create and start services")

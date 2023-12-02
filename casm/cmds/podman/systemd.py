@@ -10,8 +10,7 @@ from xarg import run_command
 from ...utils import assemble_file
 from ...utils import podman_disable_service
 from ...utils import podman_enable_service
-from .service import add_opt_services
-from .service import filter_services
+from ..service import add_opt_services
 
 
 @add_command("enable", help="Enable systemd for containers")
@@ -51,4 +50,14 @@ def run_cmd_disable(cmds: commands) -> int:
         container_name = assemble.safe_substitute(service.container_name)
         cmds.logger.info(f"disable container {container_name}")
         podman_disable_service(container_name)
+    return 0
+
+
+@add_command("systemd", help="Manage systemd units")
+def add_cmd_systemd(_arg: argp):
+    pass
+
+
+@run_command(add_cmd_systemd, add_cmd_enable, add_cmd_disable)
+def run_cmd_systemd(cmds: commands) -> int:
     return 0
