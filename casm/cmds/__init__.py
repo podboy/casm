@@ -16,6 +16,7 @@ from ..utils import __version__
 from ..utils import assemble_file
 from .podman import add_cmd_systemd
 from .podman_compose import add_cmd_down
+from .podman_compose import add_cmd_logs
 from .podman_compose import add_cmd_pause
 from .podman_compose import add_cmd_pull
 from .podman_compose import add_cmd_restart
@@ -45,7 +46,7 @@ def add_cmd(_arg: argp):
 
 @run_command(add_cmd, add_cmd_pull, add_cmd_up, add_cmd_down,
              add_cmd_start, add_cmd_stop, add_cmd_restart,
-             add_cmd_pause, add_cmd_unpause,
+             add_cmd_pause, add_cmd_unpause, add_cmd_logs,
              add_cmd_systemd, add_cmd_services)
 def run_cmd(cmds: commands) -> int:
     instance: str = DEF_INSTANCE

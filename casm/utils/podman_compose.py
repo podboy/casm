@@ -59,3 +59,13 @@ class podman_compose_cmd:
 
     def unpause(self, *services: str) -> int:
         return self.run("unpause", *services)
+
+    def logs(self, *services: str, follow: bool = False,
+             tail: Optional[int] = None) -> int:
+        cmds: List[str] = ["logs"]
+        if follow:
+            cmds.append("--follow")
+        if isinstance(tail, int):
+            cmds.append(f"--tail {tail}")
+        cmds.extend(services)
+        return self.run(*cmds)

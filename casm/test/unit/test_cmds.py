@@ -128,6 +128,26 @@ class Test_cmds(unittest.TestCase):
         mock_system.assert_called_once_with(cmd)
 
     @mock.patch.object(os, "system")
+    def test_logs(self, mock_system: mock.Mock):
+        mock_system.side_effect = [0]
+        cmds: List[str] = ["--template", self.template,
+                           "--compose", self.compose,
+                           "logs"]
+        self.assertEqual(main(cmds), 0)
+        cmd = f"podman-compose --file {self.file} logs"
+        mock_system.assert_called_once_with(cmd)
+
+    @mock.patch.object(os, "system")
+    def test_logs_opt(self, mock_system: mock.Mock):
+        mock_system.side_effect = [0]
+        cmds: List[str] = ["--template", self.template,
+                           "--compose", self.compose,
+                           "logs", "--follow", "--tail=10"]
+        self.assertEqual(main(cmds), 0)
+        cmd = f"podman-compose --file {self.file} logs --follow --tail 10"
+        mock_system.assert_called_once_with(cmd)
+
+    @mock.patch.object(os, "system")
     def test_systemd_enable(self, mock_system: mock.Mock):
         template = os.path.join("example", "systemd", "template.yml")
         compose = os.path.join("example", "systemd", "docker-compose.yml")
