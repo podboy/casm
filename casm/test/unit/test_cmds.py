@@ -8,10 +8,11 @@ import unittest
 
 import mock
 
-from casm.cmds import main
+from casm.cmds import main as casm
+from casm.cmds.podman import main as cman
 
 
-class Test_cmds(unittest.TestCase):
+class Test_casm(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -31,12 +32,12 @@ class Test_cmds(unittest.TestCase):
 
     def test_instance_is_dir(self):
         cmds: List[str] = ["--instance", "example"]
-        self.assertEqual(main(cmds), ENOENT)
+        self.assertEqual(casm(cmds), ENOENT)
 
     def test_variables_null(self):
         instance = os.path.join("example", "variables", "variables_null.yml")
         cmds: List[str] = ["--instance", instance]
-        self.assertEqual(main(cmds), 0)
+        self.assertEqual(casm(cmds), 0)
 
     def test_template(self):
         cmds: List[str] = []
@@ -45,7 +46,7 @@ class Test_cmds(unittest.TestCase):
         cmds.append("--mount-timezone")
         cmds.append("--mount-localtime")
         cmds.append("--systemd")
-        self.assertEqual(main(cmds), 0)
+        self.assertEqual(casm(cmds), 0)
 
     @mock.patch.object(os, "system")
     def test_pull(self, mock_system: mock.Mock):
@@ -53,7 +54,7 @@ class Test_cmds(unittest.TestCase):
         cmds: List[str] = ["--template", self.template,
                            "--compose", self.compose,
                            "pull"]
-        self.assertEqual(main(cmds), 0)
+        self.assertEqual(casm(cmds), 0)
         cmd = f"podman-compose --file {self.file} pull"
         mock_system.assert_called_once_with(cmd)
 
@@ -63,7 +64,7 @@ class Test_cmds(unittest.TestCase):
         cmds: List[str] = ["--template", self.template,
                            "--compose", self.compose,
                            "up"]
-        self.assertEqual(main(cmds), 0)
+        self.assertEqual(casm(cmds), 0)
         cmd = f"podman-compose --file {self.file} up --detach"
         mock_system.assert_called_once_with(cmd)
 
@@ -73,7 +74,7 @@ class Test_cmds(unittest.TestCase):
         cmds: List[str] = ["--template", self.template,
                            "--compose", self.compose,
                            "down"]
-        self.assertEqual(main(cmds), 0)
+        self.assertEqual(casm(cmds), 0)
         cmd = f"podman-compose --file {self.file} down"
         mock_system.assert_called_once_with(cmd)
 
@@ -83,7 +84,7 @@ class Test_cmds(unittest.TestCase):
         cmds: List[str] = ["--template", self.template,
                            "--compose", self.compose,
                            "start"]
-        self.assertEqual(main(cmds), 0)
+        self.assertEqual(casm(cmds), 0)
         cmd = f"podman-compose --file {self.file} start"
         mock_system.assert_called_once_with(cmd)
 
@@ -93,7 +94,7 @@ class Test_cmds(unittest.TestCase):
         cmds: List[str] = ["--template", self.template,
                            "--compose", self.compose,
                            "stop"]
-        self.assertEqual(main(cmds), 0)
+        self.assertEqual(casm(cmds), 0)
         cmd = f"podman-compose --file {self.file} stop"
         mock_system.assert_called_once_with(cmd)
 
@@ -103,7 +104,7 @@ class Test_cmds(unittest.TestCase):
         cmds: List[str] = ["--template", self.template,
                            "--compose", self.compose,
                            "restart"]
-        self.assertEqual(main(cmds), 0)
+        self.assertEqual(casm(cmds), 0)
         cmd = f"podman-compose --file {self.file} restart"
         mock_system.assert_called_once_with(cmd)
 
@@ -113,7 +114,7 @@ class Test_cmds(unittest.TestCase):
         cmds: List[str] = ["--template", self.template,
                            "--compose", self.compose,
                            "pause"]
-        self.assertEqual(main(cmds), 0)
+        self.assertEqual(casm(cmds), 0)
         cmd = f"podman-compose --file {self.file} pause"
         mock_system.assert_called_once_with(cmd)
 
@@ -123,7 +124,7 @@ class Test_cmds(unittest.TestCase):
         cmds: List[str] = ["--template", self.template,
                            "--compose", self.compose,
                            "unpause"]
-        self.assertEqual(main(cmds), 0)
+        self.assertEqual(casm(cmds), 0)
         cmd = f"podman-compose --file {self.file} unpause"
         mock_system.assert_called_once_with(cmd)
 
@@ -133,7 +134,7 @@ class Test_cmds(unittest.TestCase):
         cmds: List[str] = ["--template", self.template,
                            "--compose", self.compose,
                            "exec", "worker", "bash"]
-        self.assertEqual(main(cmds), 0)
+        self.assertEqual(casm(cmds), 0)
         cmd = f"podman-compose --file {self.file} exec worker bash"
         mock_system.assert_called_once_with(cmd)
 
@@ -144,7 +145,7 @@ class Test_cmds(unittest.TestCase):
                            "--compose", self.compose,
                            "exec", "--detach", "--privileged", "--user=test",
                            "-T", "--index=1", "worker"]
-        self.assertEqual(main(cmds), 0)
+        self.assertEqual(casm(cmds), 0)
         cmd = f"podman-compose --file {self.file} exec "\
             "--detach --privileged --user test -T --index 1 worker"
         mock_system.assert_called_once_with(cmd)
@@ -155,7 +156,7 @@ class Test_cmds(unittest.TestCase):
         cmds: List[str] = ["--template", self.template,
                            "--compose", self.compose,
                            "logs"]
-        self.assertEqual(main(cmds), 0)
+        self.assertEqual(casm(cmds), 0)
         cmd = f"podman-compose --file {self.file} logs"
         mock_system.assert_called_once_with(cmd)
 
@@ -165,7 +166,7 @@ class Test_cmds(unittest.TestCase):
         cmds: List[str] = ["--template", self.template,
                            "--compose", self.compose,
                            "logs", "--follow", "--tail=10"]
-        self.assertEqual(main(cmds), 0)
+        self.assertEqual(casm(cmds), 0)
         cmd = f"podman-compose --file {self.file} logs --follow --tail 10"
         mock_system.assert_called_once_with(cmd)
 
@@ -177,7 +178,7 @@ class Test_cmds(unittest.TestCase):
         cmds: List[str] = ["--template", template, "--compose", compose,
                            "--project-name", "unittest",
                            "systemd", "enable", "worker", "service"]
-        self.assertEqual(main(cmds), 0)
+        self.assertEqual(casm(cmds), 0)
         name = "unittest-worker"
         calls = [
             mock.call(f"podman generate systemd --name {name} > "
@@ -194,7 +195,7 @@ class Test_cmds(unittest.TestCase):
         cmds: List[str] = ["--template", template, "--compose", compose,
                            "--project-name", "unittest",
                            "systemd", "disable", "worker", "service"]
-        self.assertEqual(main(cmds), 0)
+        self.assertEqual(casm(cmds), 0)
         service = "container-unittest-worker.service"
         calls = [
             mock.call(f"systemctl stop {service}"),
@@ -206,6 +207,31 @@ class Test_cmds(unittest.TestCase):
         cmds: List[str] = ["--template", self.template,
                            "--compose", self.compose,
                            "services"]
-        self.assertEqual(main(cmds), 0)
-        self.assertEqual(main(cmds + ["--service-name"]), 0)
-        self.assertEqual(main(cmds + ["--container-name"]), 0)
+        self.assertEqual(casm(cmds), 0)
+        self.assertEqual(casm(cmds + ["--service-name"]), 0)
+        self.assertEqual(casm(cmds + ["--container-name"]), 0)
+
+
+class Test_cman(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        pass
+
+    @classmethod
+    def tearDownClass(cls):
+        pass
+
+    def setUp(self):
+        pass
+
+    def tearDown(self):
+        pass
+
+    @mock.patch.object(os, "system")
+    def test_system_prune(self, mock_system: mock.Mock):
+        mock_system.side_effect = [0]
+        cmds: List[str] = ["system", "prune"]
+        self.assertEqual(cman(cmds), 0)
+        cmd = "podman system prune"
+        mock_system.assert_called_once_with(cmd)

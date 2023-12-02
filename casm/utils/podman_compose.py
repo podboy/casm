@@ -7,7 +7,7 @@ from typing import Optional
 
 class podman_compose_cmd:
     '''
-    run podman_compose command
+    Execute podman_compose command
     '''
 
     def __init__(self, compose_file: Optional[str]):
@@ -24,11 +24,11 @@ class podman_compose_cmd:
         return f"--file {self.__compose_file}"
 
     def run(self, *args: str) -> int:
-        def exec(*cmds: str) -> int:
+        def exec(*cmds: Optional[str]) -> int:
             cmd = " ".join([c for c in cmds if c is not None])
             assert isinstance(cmd, str)
             return os.system(cmd)
-        cmds = ["podman-compose", self.opt_file]
+        cmds: List[Optional[str]] = ["podman-compose", self.opt_file]
         cmds.extend([i for i in args if len(i) > 0])
         return exec(*cmds)
 
