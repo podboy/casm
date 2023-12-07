@@ -27,5 +27,5 @@ def run_cmd_logs(cmds: commands) -> int:
     assert isinstance(assemble, assemble_file)
     services: List[str] = filter_services(assemble, cmds.args.services)
     tail = cmds.args.tail[0] if isinstance(cmds.args.tail, list) else None
-    cmd = podman_compose_cmd(assemble.compose_file)
+    cmd = podman_compose_cmd(assemble.template_file)
     return cmd.logs(services, follow=cmds.args.follow, tail=tail)

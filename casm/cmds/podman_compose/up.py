@@ -23,4 +23,4 @@ def run_cmd_up(cmds: commands) -> int:
     assemble: assemble_file = cmds.args.assemble_file
     assert isinstance(assemble, assemble_file)
     services: List[str] = filter_services(assemble, cmds.args.services)
-    return podman_compose_cmd(assemble.compose_file).up(services, detach=True)
+    return podman_compose_cmd(assemble.template_file).up(services, detach=True)

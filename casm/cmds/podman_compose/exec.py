@@ -34,7 +34,7 @@ def run_cmd_exec(cmds: commands) -> int:
     service = cmds.args.service[0]
     user = cmds.args.user[0] if isinstance(cmds.args.user, list) else None
     index = cmds.args.index[0] if isinstance(cmds.args.index, list) else None
-    cmd = podman_compose_cmd(assemble.compose_file)
+    cmd = podman_compose_cmd(assemble.template_file)
     return cmd.exec(service=service, arguments=cmds.args.arguments,
                     detach=cmds.args.detach, privileged=cmds.args.privileged,
                     user=user, T=cmds.args.T, index=index)

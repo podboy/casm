@@ -8,7 +8,7 @@ from typing import Optional
 
 from podman_compose import norm_re
 
-from .compose import compose_file as compose
+from .compose import compose_file
 from .yaml import safe_dump_file
 from .yaml import safe_load_data
 from .yaml import safe_load_file
@@ -32,11 +32,7 @@ class assemble_variables(Dict[str, str]):
         for k, v in variables.items():
             assert v is not None, f'variable "{k}" not set'
             assert isinstance(v, str), f"{type(v)} not str"
-            try:
-                value = Template(v).safe_substitute(vars)
-            except KeyError:
-                raise KeyError(f"variable {k}: {v}")
-            vars[k] = value
+            vars[k] = Template(v).safe_substitute(vars)
         for k, v in vars.items():
             assert isinstance(k, str), f"{type(k)} not str"
             assert isinstance(v, str), f"{type(v)} not str"
@@ -65,27 +61,22 @@ class assemble_file:
 
     DEF_CONFIG_FILE = "assemble.yml"
     DEF_TEMPLATE_FILE = "template.yml"
-    DEF_COMPOSE_FILE = "docker-compose.yml"
 
     KEY_VARIABLES = "variables"
     KEY_PROJECT_NAME = "project-name"
     KEY_TEMPLATE_FILE = "template-file"
-    KEY_COMPOSE_FILE = "compose-file"
 
     def __init__(self, filepath: str = DEF_CONFIG_FILE,
                  project_name: Optional[str] = None,
-                 template_file: Optional[str] = None,
-                 compose_file: Optional[str] = None):
+                 template_file: Optional[str] = None):
         assert isinstance(filepath, str)
         if project_name is None:
             project_name = default_project_name(filepath)
         assert isinstance(template_file, str) or template_file is None
-        assert isinstance(compose_file, str) or compose_file is None
         self.__abspath = os.path.abspath(filepath)
         self.__basedir = os.path.dirname(self.__abspath)
         self.__filepath = filepath
         self.__template_file = template_file
-        self.__compose_file = compose_file
         data = safe_load_file(filepath) if os.path.isfile(filepath) else dict()
         self.__assemble: Dict[str, Any] = dict() if data is None else data
         self.__project_name: str = self.__assemble.get(self.KEY_PROJECT_NAME,
@@ -95,7 +86,7 @@ class assemble_file:
         vars: Dict[str, str] = self.__assemble.get(self.KEY_VARIABLES, {})
         self.__variables: assemble_variables = assemble_variables(vars)
         tmpl: str = safe_load_data(self.template_file)
-        self.__compose = compose(self.__basedir, self.project_name, tmpl)
+        self.__template = compose_file(self.__basedir, self.project_name, tmpl)
 
     @property
     def project_name(self) -> str:
@@ -110,20 +101,12 @@ class assemble_file:
         return self.abspath(self.safe_substitute(path))
 
     @property
-    def compose_file(self) -> str:
-        if self.__compose_file is not None:
-            return self.abspath(self.safe_substitute(self.__compose_file))
-        path: str = self.__assemble.get(self.KEY_COMPOSE_FILE,
-                                        self.DEF_COMPOSE_FILE)
-        return self.abspath(self.safe_substitute(path))
-
-    @property
     def variables(self) -> assemble_variables:
         return self.__variables
 
     @property
-    def compose(self) -> compose:
-        return self.__compose
+    def template(self) -> compose_file:
+        return self.__template
 
     def abspath(self, path: str) -> str:
         if os.path.isabs(path):
@@ -138,4 +121,4 @@ class assemble_file:
 
     def dump_compose(self, filepath: Optional[str] = None):
         safe_dump_file(filepath if isinstance(filepath, str)
-                       else self.compose_file, self.compose.dump())
+                       else self.template_file, self.template.dump())

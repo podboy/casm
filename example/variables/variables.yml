@@ -1,0 +1,6 @@
+template-file: template.yml
+
+serives:
+
+variables:
+  key: value

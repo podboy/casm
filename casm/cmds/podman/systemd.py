@@ -22,7 +22,7 @@ def run_cmd_enable(cmds: commands) -> int:
     assemble: assemble_file = cmds.args.assemble_file
     assert isinstance(assemble, assemble_file)
     services: List[str] = cmds.args.services
-    for service in assemble.compose.services:
+    for service in assemble.template.services:
         cmds.logger.debug(f"{service.title}: {service.container_name}")
         if len(services) > 0 and service.title not in services:
             continue
@@ -42,7 +42,7 @@ def run_cmd_disable(cmds: commands) -> int:
     assemble: assemble_file = cmds.args.assemble_file
     assert isinstance(assemble, assemble_file)
     services: List[str] = cmds.args.services
-    for service in assemble.compose.services:
+    for service in assemble.template.services:
         cmds.logger.debug(f"{service.title}: {service.container_name}")
         if len(services) > 0 and service.title not in services:
             continue

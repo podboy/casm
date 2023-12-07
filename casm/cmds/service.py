@@ -16,7 +16,7 @@ def add_pos_services(_arg: argp):
 
 
 def filter_services(assemble: assemble_file, services: List[str]) -> List[str]:
-    names: List[str] = [s.title for s in assemble.compose.services]
+    names: List[str] = [s.title for s in assemble.template.services]
     return [s for s in names if s in services]
 
 
@@ -33,7 +33,7 @@ def add_cmd_services(_arg: argp):
 def run_cmd_services(cmds: commands) -> int:
     assemble: assemble_file = cmds.args.assemble_file
     assert isinstance(assemble, assemble_file)
-    for service in assemble.compose.services:
+    for service in assemble.template.services:
         service_name: str = assemble.safe_substitute(service.title)
         container_name: str = assemble.safe_substitute(service.container_name)
         if cmds.args.service_name:
