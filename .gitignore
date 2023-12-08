@@ -163,3 +163,4 @@ cython_debug/
 # example
 example/docker-compose.yml
 example/*/docker-compose.yml
+example/modify/*.yml.out

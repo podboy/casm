@@ -119,6 +119,6 @@ class assemble_file:
     def safe_substitute(self, value: str) -> str:
         return Template(value).safe_substitute(self.variables)
 
-    def dump_compose(self, filepath: Optional[str] = None):
+    def dump_template(self, filepath: Optional[str] = None):
         safe_dump_file(filepath if isinstance(filepath, str)
                        else self.template_file, self.template.dump())

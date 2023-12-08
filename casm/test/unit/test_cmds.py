@@ -136,8 +136,7 @@ class Test_casm(unittest.TestCase):
     @mock.patch.object(os, "system")
     def test_logs(self, mock_system: mock.Mock):
         mock_system.side_effect = [0]
-        cmds: List[str] = ["--template", self.template,
-                           "logs"]
+        cmds: List[str] = ["--template", self.template, "logs"]
         self.assertEqual(casm(cmds), 0)
         cmd = f"podman-compose --file {self.file} logs"
         mock_system.assert_called_once_with(cmd)
@@ -181,6 +180,14 @@ class Test_casm(unittest.TestCase):
             mock.call(f"systemctl disable {service}"),
         ]
         mock_system.assert_has_calls(calls)
+
+    def test_modify_template_services(self):
+        template = os.path.join("example", "modify", "services.yml")
+        output = template + ".out"
+        cmds: List[str] = ["--template", template, "modify", "template",
+                           "--output", output, "services",
+                           "--mount-localtime", "--systemd"]
+        self.assertEqual(casm(cmds), 0)
 
     def test_services(self):
         cmds: List[str] = ["--template", self.template, "services"]

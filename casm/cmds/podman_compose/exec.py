@@ -1,7 +1,5 @@
 # coding:utf-8
 
-from typing import List
-
 from xarg import add_command
 from xarg import argp
 from xarg import commands

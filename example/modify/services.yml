@@ -1,0 +1,31 @@
+version: "3.8"
+
+services:
+  web:
+    image: "nginx:alpine"
+    container_name: ${COMPOSE_PROJECT_NAME}-nginx
+    restart: always
+    networks:
+      - db
+
+  worker:
+    image: "my-worker-image:latest"
+    restart: unless-stopped
+    networks:
+      - legacy
+
+  db:
+    image: mysql
+    container_name: ${COMPOSE_PROJECT_NAME}-mysql
+    restart: on-failure
+    networks:
+      db:
+        aliases:
+          - database
+      legacy:
+        aliases:
+          - mysql
+
+networks:
+  db:
+  legacy:
