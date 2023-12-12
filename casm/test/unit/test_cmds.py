@@ -186,7 +186,7 @@ class Test_casm(unittest.TestCase):
         output = template + ".out"
         cmds: List[str] = ["--template", template, "modify", "template",
                            "--output", output, "services",
-                           "--mount-localtime", "--systemd"]
+                           "--mount-localtime", "--privileged", "--systemd"]
         self.assertEqual(casm(cmds), 0)
 
     def test_services(self):

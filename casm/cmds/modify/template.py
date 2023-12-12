@@ -28,6 +28,7 @@ def dump(cmds: commands) -> int:
 @add_command("services", help="Modify services")
 def add_cmd_services(_arg: argp):
     _arg.add_opt_on("--mount-localtime", help="Mount host localtime")
+    _arg.add_opt_on("--privileged", help="Give extended privileges")
     _arg.add_opt_on("--systemd", help="Control via systemctl")
 
 
@@ -36,12 +37,14 @@ def run_cmd_services(cmds: commands) -> int:
     assemble: assemble_file = cmds.args.assemble_file
     assert isinstance(assemble, assemble_file)
     for servive in assemble.template.services:
-        # mount host localtime to container
+        # Mount host localtime to container
         if cmds.args.mount_localtime:
             servive.mount("/etc/localtime", "/etc/localtime", True)
-        # restart via systemd
+        # Restart via systemd
         if cmds.args.systemd and servive.restart != "no":
             servive.restart = "no"
+        # Give extended privileges to this container
+        servive.privileged = cmds.args.privileged
     return dump(cmds)
 
 

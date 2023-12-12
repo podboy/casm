@@ -16,6 +16,6 @@ from .podman_compose import podman_compose_cmd
 __package_name__ = "casm"
 __prog_name__ = "casm"
 __prog_compose__ = f"{__prog_name__}-compose"
-__version__ = "0.2"
+__version__ = "0.3.alpha.1"
 
 URL_PROG = "https://github.com/podboy/casm"

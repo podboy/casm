@@ -343,6 +343,7 @@ class service_deploy:
 
 class compose_service:
     KEY_CONTAINER_NAME = "container_name"
+    KEY_PRIVILEGED = "privileged"
     KEY_RESTART = "restart"
 
     def __init__(self, services, title: str):
@@ -387,6 +388,15 @@ class compose_service:
         name = self.__value.get(self.KEY_CONTAINER_NAME, default)
         assert isinstance(name, str)
         return name if self.deploy.replicas == 1 else default
+
+    @property
+    def privileged(self) -> bool:
+        return self.__value.get(self.KEY_PRIVILEGED, False)
+
+    @privileged.setter
+    def privileged(self, value: bool):
+        assert isinstance(value, bool)
+        self.__value[self.KEY_PRIVILEGED] = value
 
     @property
     def restart(self) -> str:
