@@ -12,10 +12,12 @@ from .compose import service_volume
 from .compose import service_volumes
 from .podman import podman_cmd
 from .podman_compose import podman_compose_cmd
+from .yaml import safe_load_data
+from .yaml import safe_load_file
 
 __package_name__ = "casm"
 __prog_name__ = "casm"
 __prog_compose__ = f"{__prog_name__}-compose"
-__version__ = "0.3.alpha.1"
+__version__ = "0.3.alpha.2"
 
 URL_PROG = "https://github.com/podboy/casm"

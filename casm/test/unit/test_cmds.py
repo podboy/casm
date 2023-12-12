@@ -3,6 +3,7 @@
 
 from errno import ENOENT
 import os
+import sys
 from typing import List
 import unittest
 
@@ -16,6 +17,7 @@ class Test_casm(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        cls.instance = os.path.join("example", "instance.yml")
         cls.template = os.path.join("example", "template.yml")
         cls.file = os.path.abspath(cls.template)
 
@@ -24,10 +26,26 @@ class Test_casm(unittest.TestCase):
         pass
 
     def setUp(self):
-        pass
+        self.argv = sys.argv
 
     def tearDown(self):
-        pass
+        sys.argv = self.argv
+
+    def test_sys_argv_instance(self):
+        sys.argv = ["casm", "--instance", self.instance]
+        self.assertEqual(casm(), 0)
+
+    def test_sys_argv_instance_ArgumentError(self):
+        sys.argv = ["casm", "--instance"]
+        self.assertRaises(SystemExit, casm)
+
+    def test_sys_argv_template(self):
+        sys.argv = ["casm", "--template", self.template]
+        self.assertEqual(casm(), 0)
+
+    def test_sys_argv_template_ArgumentError(self):
+        sys.argv = ["casm", "--template"]
+        self.assertRaises(SystemExit, casm)
 
     def test_instance_is_dir(self):
         cmds: List[str] = ["--instance", "example"]
@@ -156,7 +174,7 @@ class Test_casm(unittest.TestCase):
         mock_system.side_effect = [0, 0]
         cmds: List[str] = ["--template", template,
                            "--project-name", "unittest",
-                           "systemd", "enable", "worker", "service"]
+                           "systemd", "enable", "worker"]
         self.assertEqual(casm(cmds), 0)
         name = "unittest-worker"
         calls = [
@@ -172,7 +190,7 @@ class Test_casm(unittest.TestCase):
         mock_system.side_effect = [0, 0]
         cmds: List[str] = ["--template", template,
                            "--project-name", "unittest",
-                           "systemd", "disable", "worker", "service"]
+                           "systemd", "disable", "worker"]
         self.assertEqual(casm(cmds), 0)
         service = "container-unittest-worker.service"
         calls = [
