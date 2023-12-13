@@ -88,7 +88,7 @@ class compose_volumes:
         return self.__volumes.get(title, None)
 
     def __setitem__(self, title: str, value: compose_volume):
-        assert isinstance(value, compose_network)
+        assert isinstance(value, compose_volume)
         self.__volumes[title] = value
 
     def __delitem__(self, title: str):
@@ -420,7 +420,7 @@ class compose_service:
     def deploy(self) -> service_deploy:
         return self.__deploy
 
-    def mount(self, source: str, target: str, read_only: bool):
+    def mount(self, source: str, target: str, read_only: bool) -> bool:
         mode = "ro" if read_only else "rw"
         for volume in self.volumes:
             if volume.source != source:
@@ -429,8 +429,9 @@ class compose_service:
                 continue
             if volume.read_only != read_only:
                 volume.value = f"{source}:{target}:{mode}"
-            return
+            return True
         self.volumes.append(f"{source}:{target}:{mode}")
+        return True
 
 
 class compose_services:

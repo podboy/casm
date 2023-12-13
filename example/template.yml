@@ -29,3 +29,6 @@ services:
 networks:
   db:
   legacy:
+
+volumes:
+  db:
