@@ -2,7 +2,6 @@
 
 from errno import ENOENT
 import os
-from typing import List
 from typing import Optional
 from typing import Sequence
 
@@ -41,7 +40,7 @@ def add_cmd(_arg: argp):
                       help="Specify template file")
     _arg.add_argument("--project-name", type=str, nargs=1, metavar="NAME",
                       help="Specify project name")
-    _arg.add_argument("--env", type=str, nargs="+", metavar="STR",
+    _arg.add_argument("-e", "--env", type=str, nargs=1, metavar="STR",
                       dest="environments", action="extend",
                       help="Set environment variables")
 
