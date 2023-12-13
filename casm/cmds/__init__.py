@@ -2,6 +2,7 @@
 
 from errno import ENOENT
 import os
+from typing import List
 from typing import Optional
 from typing import Sequence
 
@@ -40,6 +41,9 @@ def add_cmd(_arg: argp):
                       help="Specify template file")
     _arg.add_argument("--project-name", type=str, nargs=1, metavar="NAME",
                       help="Specify project name")
+    _arg.add_argument("--env", type=str, nargs="+", metavar="STR",
+                      dest="environments", action="extend",
+                      help="Set environment variables")
 
 
 @run_command(add_cmd, add_cmd_pull, add_cmd_up, add_cmd_down,
@@ -70,6 +74,11 @@ def run_cmd(cmds: commands) -> int:
     cmds.logger.info(f"load assemble file: '{filepath}'")
     asmf = assemble_file(filepath, project_name=project_name,
                          template_file=template_file)
+
+    if isinstance(cmds.args.environments, list):
+        for e in cmds.args.environments:
+            assert asmf.variables.update(e)
+
     cmds.logger.debug(asmf.template.dump())
     cmds.args.assemble_file = asmf
     return 0

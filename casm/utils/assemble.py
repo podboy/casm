@@ -53,6 +53,14 @@ class assemble_variables(Dict[str, str]):
         if key in os.environ:
             del os.environ[key]
 
+    def update(self, item: str) -> bool:
+        assert isinstance(item, str)
+        kv = item.split("=", 1)
+        assert len(kv) == 2, f"'{item}' format error, not 'key=value'"
+        key, value = kv
+        os.environ[key] = value
+        return os.environ[key] == value
+
 
 class assemble_file:
     '''

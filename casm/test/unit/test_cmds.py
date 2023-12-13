@@ -65,6 +65,7 @@ class Test_casm(unittest.TestCase):
         cmds: List[str] = []
         cmds.extend(["--template", self.template])
         cmds.extend(["--project-name", "unittest"])
+        cmds.extend(["--env", "key=value"])
         self.assertEqual(casm(cmds), 0)
 
     @mock.patch.object(os, "system")
