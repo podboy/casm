@@ -1,6 +1,6 @@
 MAKEFLAGS += --always-make
 
-all: build install
+all: build install test
 
 
 clean-cover:
@@ -39,3 +39,19 @@ install:
 
 uninstall:
 	pip3 uninstall -y casm
+
+
+prepare-test:
+	pip3 install --upgrade pylint flake8 pytest
+
+pylint:
+	pylint $$(git ls-files casm/*.py test/*.py example/*.py)
+
+flake8:
+	flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+	flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+pytest:
+	pytest
+
+test: prepare-test pylint flake8 pytest
