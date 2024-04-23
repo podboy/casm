@@ -18,6 +18,6 @@ from .yaml import safe_load_file
 __package_name__ = "casm"
 __prog_name__ = "casm"
 __prog_compose__ = f"{__prog_name__}-compose"
-__version__ = "0.4.alpha.1"
+__version__ = "0.4"
 
 URL_PROG = "https://github.com/podboy/casm"
