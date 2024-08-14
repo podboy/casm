@@ -10,8 +10,8 @@ from xarg import argp
 from xarg import commands
 from xarg import run_command
 
-from ..utils import URL_PROG
-from ..utils import __prog_name__
+from ..utils import __url_home__
+from ..utils import __project__
 from ..utils import __version__
 from ..utils import assemble_file
 from .modify import add_cmd_modify
@@ -32,7 +32,7 @@ from .service import add_cmd_services
 DEF_INSTANCE = assemble_file.DEF_CONFIG_FILE
 
 
-@add_command(__prog_name__)
+@add_command(__project__)
 def add_cmd(_arg: argp):
     _arg.add_argument("--instance", type=str, nargs=1, metavar="INSTANC",
                       help=f"YAML format config file, default {DEF_INSTANCE}")
@@ -90,4 +90,4 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         root=add_cmd,
         argv=argv,
         description="assemble compose",
-        epilog=f"For more, please visit {URL_PROG}.")
+        epilog=f"For more, please visit {__url_home__}.")
