@@ -1,3 +1,5 @@
 makefile-help
 xarg-python >= 1.5.1
-podman_compose >= 1.0.6
+podman_compose >= 1.2.0
+podman >= 5.0.0
+xmanage >= 0.4

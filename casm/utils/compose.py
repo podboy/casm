@@ -176,8 +176,7 @@ class compose_networks:
 
 
 class service_volume:
-    '''
-    Short syntax: [SOURCE:]TARGET[:MODE]
+    '''Short syntax: [SOURCE:]TARGET[:MODE]
 
     Long syntax: Added in version 3.2 file format.
     https://docs.docker.com/compose/compose-file/compose-file-v3/#long-syntax-3
@@ -202,8 +201,7 @@ class service_volume:
             self.__short = short
 
     def __get_volume_name(self) -> Optional[str]:
-        '''
-        Same as podman_compose.fix_mount_dict()
+        '''Same as podman_compose.fix_mount_dict()
         '''
         __volume_name = None
         if self.type == "volume":
@@ -257,8 +255,7 @@ class service_volume:
 
     @property
     def type(self) -> str:
-        '''
-        "bind", "volume"
+        '''bind, volume
         '''
         type = self.generic.get(self.KEY_TYPE, None)
         assert isinstance(type, str)
@@ -278,8 +275,7 @@ class service_volume:
 
     @property
     def read_only(self) -> bool:
-        '''
-        default read-write(rw)
+        '''default read-write(rw)
         '''
         read_only = self.generic.get(self.KEY_READ_ONLY, False)
         assert isinstance(read_only, bool)
@@ -379,8 +375,7 @@ class compose_service:
 
     @property
     def container_name(self) -> str:
-        '''
-        Same as container_names_by_service in
+        '''Same as container_names_by_service in
         podman_compose._parse_compose_file()
         '''
         project_name = self.__root.project_name
@@ -473,8 +468,7 @@ class compose_services:
 
 
 class compose_file:
-    '''
-    For more, please visit https://docs.docker.com/compose/compose-file
+    '''For more, please visit https://docs.docker.com/compose/compose-file
 
     2.x: https://docs.docker.com/compose/compose-file/compose-file-v2
     3.x: https://docs.docker.com/compose/compose-file/compose-file-v3
