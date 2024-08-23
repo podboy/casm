@@ -62,6 +62,9 @@ class podman_container:
 
     def generate_service(self, restart_policy: str = "on-failure",
                          stop_timeout: int = 10) -> systemd_service:
+        if not isinstance(CMD, str):
+            raise FileNotFoundError("podman command not found")
+
         content: str = f"""
 [Unit]
 Description=Podman {self.service_unit}
@@ -113,11 +116,15 @@ class podman_cmd:
 
     @classmethod
     def run(cls, *args: str) -> int:
-        def exec(*cmds: Optional[str]) -> int:
+        def exec(*cmds: str) -> int:
             cmd = " ".join([c for c in cmds if c is not None])
             assert isinstance(cmd, str)
             return os.system(cmd)
-        cmds: List[Optional[str]] = [CMD]
+
+        if not isinstance(CMD, str):
+            raise FileNotFoundError("podman command not found")
+
+        cmds: List[str] = [CMD]
         cmds.extend([i for i in args if len(i) > 0])
         return exec(*cmds)
 
