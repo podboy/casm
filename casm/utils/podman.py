@@ -3,6 +3,7 @@
 import os
 import shutil
 from typing import Dict
+from typing import Iterable
 from typing import List
 from typing import Optional
 
@@ -61,7 +62,17 @@ class podman_container:
         return os.system(f"systemctl stop {self.service_unit}")
 
     def generate_service(self, restart_policy: str = "on-failure",
-                         stop_timeout: int = 10) -> systemd_service:
+                         restart_sect: Optional[int] = None,
+                         start_timeout: Optional[int] = None,
+                         stop_timeout: int = 10,
+                         wants: Optional[Iterable[str]] = None,
+                         after: Optional[Iterable[str]] = None,
+                         requires: Optional[Iterable[str]] = None
+                         ) -> systemd_service:
+        """generate systemd unit for a container
+
+        same as 'podman generate systemd <container>'
+        """
         if not isinstance(CMD, str):
             raise FileNotFoundError("podman command not found")
 
@@ -71,10 +82,15 @@ Description=Podman {self.service_unit}
 Wants=network-online.target
 After=network-online.target
 RequiresMountsFor=/run/containers/storage
+{f"Wants={' '.join(wants)}" if wants is not None else ""}
+{f"After={' '.join(after)}" if after is not None else ""}
+{f"Requires={' '.join(requires)}" if requires is not None else ""}
 
 [Service]
 Environment=PODMAN_SYSTEMD_UNIT=%n
 Restart={restart_policy}
+{f"RestartSec={restart_sect}" if restart_sect is not None else ""}
+{f"TimeoutStartSec={start_timeout}" if start_timeout is not None else ""}
 TimeoutStopSec=70
 ExecStart={CMD} start {self.container_name}
 ExecStop={CMD} stop -t {stop_timeout} {self.container_name}
