@@ -2,6 +2,7 @@
 
 import os
 import shutil
+from typing import Any
 from typing import Dict
 from typing import Iterable
 from typing import List
@@ -9,11 +10,39 @@ from typing import Optional
 
 from podman import PodmanClient
 from podman.domain.containers import Container
-from xmanage import systemd_path
 from xmanage import systemd_service
+
+from .common import mountpoint
 
 UID: int = os.getuid()
 CMD: Optional[str] = shutil.which("podman")
+
+
+class podman_container_inspect:
+    def __init__(self, container: Container):
+        assert isinstance(container, Container)
+        self.__container: Container = container
+        self.__info: Dict[str, Any] = container.inspect()
+
+    @property
+    def container(self) -> Container:
+        return self.__container
+
+    @property
+    def info(self) -> Dict[str, Any]:
+        return self.__info
+
+    @property
+    def PidFile(self) -> str:
+        return self.info["PidFile"]
+
+    @property
+    def HostConfig(self) -> Dict[str, Any]:
+        return self.info["HostConfig"]
+
+    @property
+    def Binds(self) -> List[str]:
+        return self.HostConfig["Binds"]
 
 
 class podman_container:
@@ -43,20 +72,12 @@ class podman_container:
     def container_name(self) -> str:
         return self.__container_name
 
-    def inspect(self) -> Dict[str, str]:
-        return self.container.inspect()
-
-    @property
-    def PidFile(self) -> str:
-        return self.container.inspect()["PidFile"]
+    def inspect(self) -> podman_container_inspect:
+        return podman_container_inspect(self.container)
 
     @property
     def service_unit(self) -> str:
         return f"container-{self.container_name}.service"
-
-    @property
-    def service_path(self) -> str:
-        return os.path.join(systemd_path.systemd_system_conf_dir, self.service_unit)  # noqa
 
     def stop_service(self) -> int:
         return os.system(f"systemctl stop {self.service_unit}")
@@ -76,15 +97,20 @@ class podman_container:
         if not isinstance(CMD, str):
             raise FileNotFoundError("podman command not found")
 
+        container_inspect: podman_container_inspect = self.inspect()
+        mounts: List[Optional[str]] = [mountpoint(bind.split(":")[0]) for bind in  # noqa
+                                       container_inspect.Binds if bind.startswith("/")]  # noqa
+        mountpoints: List[str] = ["/run/containers/storage"]
+        mountpoints.extend([m for m in mounts if isinstance(m, str)])
         content: str = f"""
 [Unit]
 Description=Podman {self.service_unit}
 Wants=network-online.target
 After=network-online.target
-RequiresMountsFor=/run/containers/storage
+{f"RequiresMountsFor={' '.join(mountpoints)}"}
+{f"Requires={' '.join(requires)}" if requires is not None else ""}
 {f"Wants={' '.join(wants)}" if wants is not None else ""}
 {f"After={' '.join(after)}" if after is not None else ""}
-{f"Requires={' '.join(requires)}" if requires is not None else ""}
 
 [Service]
 Environment=PODMAN_SYSTEMD_UNIT=%n
@@ -95,7 +121,7 @@ TimeoutStopSec=70
 ExecStart={CMD} start {self.container_name}
 ExecStop={CMD} stop -t {stop_timeout} {self.container_name}
 ExecStopPost={CMD} stop -t {stop_timeout} {self.container_name}
-PIDFile={self.PidFile}
+PIDFile={container_inspect.PidFile}
 Type=forking
 
 [Install]
@@ -104,7 +130,7 @@ WantedBy=default.target
         return systemd_service.from_string(content)
 
     def enable_service(self) -> int:
-        self.generate_service().create_unit(systemd_path.systemd_system_conf_dir, self.service_unit)  # noqa
+        self.generate_service().create_unit(unit=self.service_unit)
         errno = os.system(f"systemctl enable --now {self.service_unit}")
         if errno != 0:
             return errno
@@ -117,9 +143,7 @@ WantedBy=default.target
         errno = os.system(f"systemctl disable {self.service_unit}")
         if errno != 0:
             return errno
-        service_path: str = self.service_path
-        if os.path.isfile(service_path):
-            os.remove(service_path)
+        systemd_service.delete_unit(unit=self.service_unit)
         return 0
 
 
