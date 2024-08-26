@@ -14,7 +14,7 @@ from xmanage import systemd_service
 
 from .common import mountpoint
 
-UID: int = os.getuid()
+# UID: int = os.getuid()
 CMD: Optional[str] = shutil.which("podman")
 
 
@@ -48,7 +48,7 @@ class podman_container_inspect:
 class podman_container:
     '''Manage podman container
     '''
-    URI: str = f"unix:///run/user/{UID}/podman/podman.sock"
+    BASEURL: str = "unix:///run/podman/podman.sock"
 
     def __init__(self, container_name: str):
         assert isinstance(container_name, str)
@@ -59,7 +59,7 @@ class podman_container:
     @property
     def client(self) -> PodmanClient:
         if self.__client is None:
-            self.__client = PodmanClient(base_url=self.URI)
+            self.__client = PodmanClient(base_url=self.BASEURL)
         return self.__client
 
     @property
