@@ -129,8 +129,10 @@ WantedBy=default.target
 """
         return systemd_service.from_string(content)
 
-    def enable_service(self) -> int:
-        self.generate_service().create_unit(unit=self.service_unit)
+    def enable_service(self, restart_policy: str = "on-failure") -> int:
+        service = self.generate_service(restart_policy=restart_policy)
+        service.create_unit(unit=self.service_unit)
+
         errno = os.system(f"systemctl enable --now {self.service_unit}")
         if errno != 0:
             return errno

@@ -14,11 +14,15 @@ from ..service import add_pos_services
 
 @add_command("enable", help="Enable systemd for containers")
 def add_cmd_enable(_arg: argp):
+    _arg.add_argument("--restart-policy", dest="restart_policy",
+                      type=str, nargs=1, metavar="STR", default=["on-failure"],
+                      help='Systemd restart-policy (default "on-failure")')
     add_pos_services(_arg)
 
 
 @run_command(add_cmd_enable)
 def run_cmd_enable(cmds: commands) -> int:
+    restart_policy: str = cmds.args.restart_policy[0]
     assemble: assemble_file = cmds.args.assemble_file
     assert isinstance(assemble, assemble_file)
     services: List[str] = cmds.args.services
@@ -28,7 +32,8 @@ def run_cmd_enable(cmds: commands) -> int:
             continue
         container_name = assemble.safe_substitute(service.container_name)
         cmds.logger.info(f"enable container {container_name}")
-        podman_container(container_name).enable_service()
+        podman_container(container_name).enable_service(
+            restart_policy=restart_policy)
     return 0
 
 
