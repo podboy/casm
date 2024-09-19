@@ -19,10 +19,83 @@ CMD: Optional[str] = shutil.which("podman")
 
 
 class podman_container_inspect:
+
+    class state_struct:
+
+        class health_struct:
+            def __init__(self, value: Dict[str, Any]):
+                assert isinstance(value, dict)
+                self.__value: Dict[str, Any] = value
+
+            @property
+            def Status(self) -> str:
+                return self.__value["Status"]
+
+            @property
+            def FailingStreak(self) -> int:
+                return self.__value["FailingStreak"]
+
+        def __init__(self, value: Dict[str, Any]):
+            assert isinstance(value, dict)
+            self.__value: Dict[str, Any] = value
+            health: Optional[Dict[str, Any]] = value.get("Health")
+            self.__health = self.health_struct(health) if health else None
+
+        @property
+        def Status(self) -> str:
+            return self.__value["Status"]
+
+        @property
+        def Running(self) -> bool:
+            return self.__value["Running"]
+
+        @property
+        def Paused(self) -> bool:
+            return self.__value["Paused"]
+
+        @property
+        def Restarting(self) -> bool:
+            return self.__value["Restarting"]
+
+        @property
+        def OOMKilled(self) -> bool:
+            return self.__value["OOMKilled"]
+
+        @property
+        def Dead(self) -> bool:
+            return self.__value["Dead"]
+
+        @property
+        def Pid(self) -> int:
+            return self.__value["Pid"]
+
+        @property
+        def ConmonPid(self) -> int:
+            return self.__value["ConmonPid"]
+
+        @property
+        def ExitCode(self) -> int:
+            return self.__value["ExitCode"]
+
+        @property
+        def Health(self) -> Optional[health_struct]:
+            return self.__health
+
+    class host_config_struct:
+        def __init__(self, value: Dict[str, Any]):
+            assert isinstance(value, dict)
+            self.__value: Dict[str, Any] = value
+
+        @property
+        def Binds(self) -> List[str]:
+            return self.__value["Binds"]
+
     def __init__(self, container: Container):
         assert isinstance(container, Container)
         self.__container: Container = container
         self.__info: Dict[str, Any] = container.inspect()
+        self.__state: Optional[podman_container_inspect.state_struct] = None
+        self.__host_config: Optional[podman_container_inspect.host_config_struct] = None  # noqa: E501
 
     @property
     def container(self) -> Container:
@@ -33,16 +106,32 @@ class podman_container_inspect:
         return self.__info
 
     @property
+    def Id(self) -> str:
+        return self.info["Id"]
+
+    @property
+    def Name(self) -> str:
+        return self.info["Name"]
+
+    @property
+    def RestartCount(self) -> int:
+        return self.info["RestartCount"]
+
+    @property
     def PidFile(self) -> str:
         return self.info["PidFile"]
 
     @property
-    def HostConfig(self) -> Dict[str, Any]:
-        return self.info["HostConfig"]
+    def State(self) -> state_struct:
+        if self.__state is None:
+            self.__state = self.state_struct(self.info["State"])
+        return self.__state
 
     @property
-    def Binds(self) -> List[str]:
-        return self.HostConfig["Binds"]
+    def HostConfig(self) -> host_config_struct:
+        if self.__host_config is None:
+            self.__host_config = self.host_config_struct(self.info["HostConfig"])  # noqa: E501
+        return self.__host_config
 
 
 class podman_container:
@@ -98,8 +187,8 @@ class podman_container:
             raise FileNotFoundError("podman command not found")
 
         container_inspect: podman_container_inspect = self.inspect()
-        mounts: List[Optional[str]] = [mountpoint(bind.split(":")[0]) for bind in  # noqa
-                                       container_inspect.Binds if bind.startswith("/")]  # noqa
+        mounts: List[Optional[str]] = [mountpoint(bind.split(":")[0]) for bind in  # noqa: E501
+                                       container_inspect.HostConfig.Binds if bind.startswith("/")]  # noqa: E501
         mountpoints: List[str] = ["/run/containers/storage"]
         mountpoints.extend([m for m in mounts if isinstance(m, str)])
         content: str = f"""

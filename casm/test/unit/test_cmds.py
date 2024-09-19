@@ -3,6 +3,7 @@
 
 from errno import ENOENT
 import os
+import shutil
 import sys
 from typing import List
 import unittest
@@ -11,6 +12,7 @@ import mock
 
 from casm.cmds import main as casm
 from casm.cmds.podman import main as cman
+from casm.utils.podman import podman_container
 
 
 class Test_casm(unittest.TestCase):
@@ -170,6 +172,7 @@ class Test_casm(unittest.TestCase):
         mock_system.assert_called_once_with(cmd)
 
     @mock.patch.object(os, "system")
+    @mock.patch.object(podman_container, "generate_service", mock.MagicMock())
     def test_systemd_enable(self, mock_system: mock.Mock):
         template = os.path.join("example", "systemd", "template.yml")
         mock_system.side_effect = [0, 0]
@@ -179,13 +182,12 @@ class Test_casm(unittest.TestCase):
         self.assertEqual(casm(cmds), 0)
         name = "unittest-worker"
         calls = [
-            mock.call(f"podman generate systemd --name {name} > "
-                      f"/etc/systemd/system/container-{name}.service"),
             mock.call(f"systemctl enable --now container-{name}.service"),
         ]
         mock_system.assert_has_calls(calls)
 
     @mock.patch.object(os, "system")
+    @mock.patch.object(podman_container, "generate_service", mock.MagicMock())
     def test_systemd_disable(self, mock_system: mock.Mock):
         template = os.path.join("example", "systemd", "template.yml")
         mock_system.side_effect = [0, 0]
@@ -236,5 +238,5 @@ class Test_cman(unittest.TestCase):
         mock_system.side_effect = [0]
         cmds: List[str] = ["system", "prune"]
         self.assertEqual(cman(cmds), 0)
-        cmd = "podman system prune"
+        cmd = f"{shutil.which('podman')} system prune"
         mock_system.assert_called_once_with(cmd)

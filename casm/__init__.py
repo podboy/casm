@@ -10,5 +10,6 @@ from .utils import compose_services
 from .utils import compose_volume
 from .utils import compose_volumes
 from .utils import podman_container
+from .utils import podman_container_inspect
 from .utils import service_volume
 from .utils import service_volumes

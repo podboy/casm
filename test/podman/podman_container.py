@@ -36,7 +36,7 @@ class ContainerManager:
         return self.__container_name
 
     @property
-    def PidFile(self) -> str:
+    def pid_file(self) -> str:
         return self.container.inspect()["PidFile"]
 
     def inspect(self) -> Dict[str, str]:
@@ -44,6 +44,5 @@ class ContainerManager:
 
 
 if __name__ == "__main__":
-    container_name: str = sys.argv[1]
-    container = ContainerManager(container_name)
+    container = ContainerManager(container_name=sys.argv[1])
     print(container.inspect())

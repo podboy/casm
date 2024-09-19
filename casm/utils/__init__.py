@@ -15,6 +15,7 @@ from .compose import service_volume
 from .compose import service_volumes
 from .podman import podman_cmd
 from .podman import podman_container
+from .podman import podman_container_inspect
 from .podman_compose import podman_compose_cmd
 from .yaml import safe_load_data
 from .yaml import safe_load_file
