@@ -10,8 +10,10 @@ from xarg import run_command
 
 from ...utils import __url_home__
 from ...utils import __version__
+from .container import add_cmd_container
+from .guard import add_cmd_guard  # noqa:F401
 from .system import add_cmd_system
-from .systemd import add_cmd_systemd
+from .systemd import add_cmd_systemd  # noqa:F401
 
 
 @add_command("cman")
@@ -19,7 +21,7 @@ def add_cmd(_arg: argp):
     pass
 
 
-@run_command(add_cmd, add_cmd_system)
+@run_command(add_cmd, add_cmd_container, add_cmd_system)
 def run_cmd(cmds: commands) -> int:
     return 0
 

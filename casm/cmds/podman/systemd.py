@@ -12,7 +12,7 @@ from ...utils import podman_container
 from ..service import add_pos_services
 
 
-@add_command("enable", help="Enable systemd for containers")
+@add_command("enable", help="Enable systemd unit for containers")
 def add_cmd_enable(_arg: argp):
     _arg.add_argument("--restart-policy", dest="restart_policy",
                       type=str, nargs=1, metavar="STR", default=["on-failure"],
@@ -37,7 +37,7 @@ def run_cmd_enable(cmds: commands) -> int:
     return 0
 
 
-@add_command("disable", help="Disable systemd for containers")
+@add_command("disable", help="Disable systemd unit for containers")
 def add_cmd_disable(_arg: argp):
     add_pos_services(_arg)
 

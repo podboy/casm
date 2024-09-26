@@ -10,11 +10,12 @@ from xarg import argp
 from xarg import commands
 from xarg import run_command
 
-from ..utils import __url_home__
 from ..utils import __project__
+from ..utils import __url_home__
 from ..utils import __version__
 from ..utils import assemble_file
 from .modify import add_cmd_modify
+from .podman import add_cmd_guard
 from .podman import add_cmd_system
 from .podman import add_cmd_systemd
 from .podman_compose import add_cmd_down
@@ -48,7 +49,8 @@ def add_cmd(_arg: argp):
 @run_command(add_cmd, add_cmd_pull, add_cmd_up, add_cmd_down,
              add_cmd_start, add_cmd_stop, add_cmd_restart,
              add_cmd_pause, add_cmd_unpause, add_cmd_exec, add_cmd_logs,
-             add_cmd_system, add_cmd_systemd, add_cmd_services, add_cmd_modify)
+             add_cmd_system, add_cmd_systemd, add_cmd_guard,
+             add_cmd_services, add_cmd_modify)
 def run_cmd(cmds: commands) -> int:
     instance: str = DEF_INSTANCE
     if isinstance(cmds.args.instance, list):

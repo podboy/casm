@@ -1,5 +1,6 @@
 # coding:utf-8
 
+import getpass
 import os
 import shutil
 from typing import Any
@@ -7,6 +8,7 @@ from typing import Dict
 from typing import Iterable
 from typing import List
 from typing import Optional
+from typing import Tuple
 
 from podman import PodmanClient
 from podman.domain.containers import Container
@@ -95,7 +97,7 @@ class podman_container_inspect:
         self.__container: Container = container
         self.__info: Dict[str, Any] = container.inspect()
         self.__state: Optional[podman_container_inspect.state_struct] = None
-        self.__host_config: Optional[podman_container_inspect.host_config_struct] = None  # noqa: E501
+        self.__host_config: Optional[podman_container_inspect.host_config_struct] = None  # noqa:E501
 
     @property
     def container(self) -> Container:
@@ -130,7 +132,7 @@ class podman_container_inspect:
     @property
     def HostConfig(self) -> host_config_struct:
         if self.__host_config is None:
-            self.__host_config = self.host_config_struct(self.info["HostConfig"])  # noqa: E501
+            self.__host_config = self.host_config_struct(self.info["HostConfig"])  # noqa:E501
         return self.__host_config
 
 
@@ -168,8 +170,43 @@ class podman_container:
     def service_unit(self) -> str:
         return f"container-{self.container_name}.service"
 
+    @property
+    def healthy(self) -> bool:
+        inspect = self.inspect()
+
+        def __restarting() -> bool:
+            return inspect.State.Restarting
+
+        def __running() -> bool:
+            return inspect.State.Status == "running" and\
+                inspect.State.Running and\
+                not inspect.State.Paused and\
+                not inspect.State.OOMKilled and\
+                not inspect.State.Dead
+
+        def __healthy() -> bool:
+            health = inspect.State.Health
+            return health is None or health.Status == "healthy"
+
+        return __restarting() or __running() and __healthy()
+
+    def stop(self) -> int:
+        return os.system(f"podman container stop {self.container_name}")
+
+    def start(self) -> int:
+        return os.system(f"podman container start {self.container_name}")
+
+    def restart(self) -> int:
+        return os.system(f"podman container restart {self.container_name}")
+
     def stop_service(self) -> int:
         return os.system(f"systemctl stop {self.service_unit}")
+
+    def start_service(self) -> int:
+        return os.system(f"systemctl start {self.service_unit}")
+
+    def restart_service(self) -> int:
+        return os.system(f"systemctl restart {self.service_unit}")
 
     def generate_service(self, restart_policy: str = "on-failure",
                          restart_sect: Optional[int] = None,
@@ -187,8 +224,8 @@ class podman_container:
             raise FileNotFoundError("podman command not found")
 
         container_inspect: podman_container_inspect = self.inspect()
-        mounts: List[Optional[str]] = [mountpoint(bind.split(":")[0]) for bind in  # noqa: E501
-                                       container_inspect.HostConfig.Binds if bind.startswith("/")]  # noqa: E501
+        mounts: List[Optional[str]] = [mountpoint(bind.split(":")[0]) for bind in  # noqa:E501
+                                       container_inspect.HostConfig.Binds if bind.startswith("/")]  # noqa:E501
         mountpoints: List[str] = ["/run/containers/storage"]
         mountpoints.extend([m for m in mounts if isinstance(m, str)])
         content: str = f"""
@@ -236,6 +273,26 @@ WantedBy=default.target
             return errno
         systemd_service.delete_unit(unit=self.service_unit)
         return 0
+
+    def generate_guard_task(self, interval: int = 3) -> int:
+        container_name: str = self.container_name
+        with open(f"/etc/cron.d/guard-container-{container_name}.sh", "w") as hdl:  # noqa:E501
+            username: str = getpass.getuser()
+            hdl.write(f"PATH={os.environ['PATH']}\n")
+            hdl.write(f"*/{interval} * * * * {username} cman container guard {container_name}\n")  # noqa:E501
+        return 0
+
+    def guard(self) -> bool:
+        def __restart() -> bool:
+            return self.restart_service() == 0 or self.restart() == 0
+        return __restart() if not self.healthy else True
+
+    @classmethod
+    def list(cls, all: bool = False) -> Tuple[str, ...]:
+        client: PodmanClient = PodmanClient(base_url=cls.BASEURL)
+        containers: List[Container] = client.containers.list(all=all)
+        container_names = [container.name for container in containers]
+        return tuple(name for name in container_names if isinstance(name, str))
 
 
 class podman_cmd:
