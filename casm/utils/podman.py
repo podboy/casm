@@ -171,6 +171,10 @@ class podman_container:
         return f"container-{self.container_name}.service"
 
     @property
+    def guard_crontab_file(self) -> str:
+        return f"/etc/cron.d/guard-container-{self.container_name}.sh"
+
+    @property
     def healthy(self) -> bool:
         inspect = self.inspect()
 
@@ -275,11 +279,16 @@ WantedBy=default.target
         return 0
 
     def generate_guard_task(self, interval: int = 3) -> int:
-        container_name: str = self.container_name
-        with open(f"/etc/cron.d/guard-container-{container_name}.sh", "w") as hdl:  # noqa:E501
+        with open(self.guard_crontab_file, "w") as hdl:
             username: str = getpass.getuser()
             hdl.write(f"PATH={os.environ['PATH']}\n")
-            hdl.write(f"*/{interval} * * * * {username} cman container guard {container_name}\n")  # noqa:E501
+            hdl.write(f"*/{interval} * * * * {username} cman container guard {self.container_name}\n")  # noqa:E501
+        return 0
+
+    def destroy_guard_task(self) -> int:
+        crontab_file: str = self.guard_crontab_file
+        if os.path.isfile(crontab_file):
+            os.remove(crontab_file)
         return 0
 
     def guard(self) -> bool:
