@@ -200,6 +200,12 @@ class podman_container:
     def start(self) -> int:
         return os.system(f"podman container start {self.container_name}")
 
+    def pause(self) -> int:
+        return os.system(f"podman container pause {self.container_name}")
+
+    def unpause(self) -> int:
+        return os.system(f"podman container unpause {self.container_name}")
+
     def restart(self) -> int:
         return os.system(f"podman container restart {self.container_name}")
 
