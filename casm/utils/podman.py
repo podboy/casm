@@ -291,10 +291,10 @@ WantedBy=default.target
             os.remove(crontab_file)
         return 0
 
-    def guard(self) -> bool:
-        def __restart() -> bool:
-            return self.restart_service() == 0 or self.restart() == 0
-        return __restart() if not self.healthy else True
+    def guard(self) -> int:
+        def __restart() -> int:
+            return self.restart() if self.restart_service() != 0 else 0
+        return __restart() if not self.healthy else 0
 
     @classmethod
     def list(cls, all: bool = False) -> Tuple[str, ...]:

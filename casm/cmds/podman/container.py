@@ -27,7 +27,10 @@ def run_cmd_container_guard(cmds: commands) -> int:
     containers: Iterable[str] = cmds.args.containers or podman_container.list(all=True)  # noqa:E501
     for container_name in containers:
         cmds.logger.info(f"guard container {container_name}")
-        podman_container(container_name).guard()
+        exit_code: int = podman_container(container_name).guard()
+        if exit_code != 0:
+            cmds.logger.error(f"failed to guard container {container_name} (exit-code: {exit_code})")  # noqa:E501
+            return exit_code
     return 0
 
 
