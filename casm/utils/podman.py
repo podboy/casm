@@ -1,7 +1,9 @@
 # coding:utf-8
 
 import getpass
+from grp import getgrnam
 import os
+from pwd import getpwnam
 import shutil
 from typing import Any
 from typing import Dict
@@ -289,6 +291,8 @@ WantedBy=default.target
             username: str = getpass.getuser()
             hdl.write(f"PATH={os.environ['PATH']}\n")
             hdl.write(f"*/{interval} * * * * {username} cman container guard {self.container_name}\n")  # noqa:E501
+        os.chown(self.guard_crontab_file, getpwnam("root").pw_uid, getgrnam("root").gr_gid)  # noqa:E501
+        os.chmod(self.guard_crontab_file, 0o644)
         return 0
 
     def destroy_guard_task(self) -> int:
