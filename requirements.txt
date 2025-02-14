@@ -1,5 +1,5 @@
 makefile-help
-xarg-python >= 1.7.1
+xkits >= 2.1.2
 podman_compose >= 1.2.0
 podman >= 5.2.0
 xmanage >= 0.4.2
