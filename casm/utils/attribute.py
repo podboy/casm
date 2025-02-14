@@ -3,7 +3,7 @@
 from urllib.parse import urljoin
 
 __project__ = "casm"
-__version__ = "0.6.2"
+__version__ = "0.7.0"
 __description__ = "container assembler"
 __url_home__ = "https://github.com/podboy/casm"
 __url_code__ = __url_home__
