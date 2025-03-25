@@ -12,6 +12,7 @@ from ...utils import podman_cmd
 def add_cmd_prune(_arg: argp):
     pass
 
+
 @run_command(add_cmd_prune)
 def run_cmd_prune(cmds: commands) -> int:
     return podman_cmd.system_prune()
