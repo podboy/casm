@@ -1,13 +1,20 @@
 MAKEFLAGS += --always-make
 
-all: build install test
+VERSION := $(shell python3 -c "from casm.utils.attribute import __version__; print(__version__)")
+
+all: build reinstall test
+
+
+release: all
+	git tag -a v${VERSION} -m "release v${VERSION}"
+	git push origin --tags
 
 
 clean-cover:
-	rm -rf cover .coverage
-clean-tox: clean-cover
+	rm -rf cover .coverage coverage.xml htmlcov
+clean-tox:
 	rm -rf .stestr .tox
-clean: build-clean clean-tox
+clean: build-clean test-clean clean-cover clean-tox
 
 
 upload:
@@ -16,7 +23,9 @@ upload:
 
 build-clean:
 	xpip-build --debug setup --clean
-build: build-clean
+build-requirements:
+	pip3 install -r requirements.txt
+build: build-clean build-requirements
 	xpip-build --debug setup --all
 
 
@@ -27,13 +36,16 @@ uninstall:
 reinstall: uninstall install
 
 
-prepare-test:
-	pip3 install --upgrade pylint flake8 pytest
+test-prepare:
+	pip3 install --upgrade mock pylint flake8 pytest pytest-cov
 pylint:
-	pylint $$(git ls-files casm/*.py test/*.py example/*.py)
+	pylint $(shell git ls-files casm/*.py)
 flake8:
-	flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-	flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+	flake8 casm --count --select=E9,F63,F7,F82 --show-source --statistics
+	flake8 casm --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 pytest:
-	pytest
-test: prepare-test pylint flake8 pytest
+	pytest --cov=casm --cov-report=term-missing --cov-report=xml --cov-report=html --cov-config=.coveragerc --cov-fail-under=100
+pytest-clean:
+	rm -rf .pytest_cache
+test: test-prepare pylint flake8 pytest
+test-clean: pytest-clean

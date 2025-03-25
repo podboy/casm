@@ -8,7 +8,7 @@ from xkits import argp
 from xkits import commands
 from xkits import run_command
 
-from ...utils import __url_home__
+from ...utils import __urlhome__
 from ...utils import __version__
 from .container import add_cmd_container
 from .guard import add_cmd_guard  # noqa:F401
@@ -33,4 +33,4 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         root=add_cmd,
         argv=argv,
         description="Manage pods, containers and images via podman",
-        epilog=f"For more, please visit {__url_home__}.")
+        epilog=f"For more, please visit {__urlhome__}.")

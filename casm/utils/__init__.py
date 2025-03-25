@@ -2,7 +2,7 @@
 
 from .assemble import assemble_file
 from .attribute import __project__
-from .attribute import __url_home__
+from .attribute import __urlhome__
 from .attribute import __version__
 from .compose import compose_file
 from .compose import compose_network

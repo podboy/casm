@@ -11,7 +11,7 @@ from xkits import commands
 from xkits import run_command
 
 from ..utils import __project__
-from ..utils import __url_home__
+from ..utils import __urlhome__
 from ..utils import __version__
 from ..utils import assemble_file
 from .modify import add_cmd_modify
@@ -92,4 +92,4 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         root=add_cmd,
         argv=argv,
         description="assemble compose",
-        epilog=f"For more, please visit {__url_home__}.")
+        epilog=f"For more, please visit {__urlhome__}.")

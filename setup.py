@@ -7,10 +7,10 @@ from casm.utils.attribute import __author__
 from casm.utils.attribute import __author_email__
 from casm.utils.attribute import __description__
 from casm.utils.attribute import __project__
-from casm.utils.attribute import __url_bugs__
-from casm.utils.attribute import __url_code__
-from casm.utils.attribute import __url_docs__
-from casm.utils.attribute import __url_home__
+from casm.utils.attribute import __urlbugs__
+from casm.utils.attribute import __urlcode__
+from casm.utils.attribute import __urldocs__
+from casm.utils.attribute import __urlhome__
 from casm.utils.attribute import __version__
 
 
@@ -27,11 +27,11 @@ setup(
     name=__project__,
     version=__version__,
     description=__description__,
-    url=__url_home__,
+    url=__urlhome__,
     author=__author__,
     author_email=__author_email__,
-    project_urls={"Source Code": __url_code__,
-                  "Bug Tracker": __url_bugs__,
-                  "Documentation": __url_docs__},
+    project_urls={"Source Code": __urlcode__,
+                  "Bug Tracker": __urlbugs__,
+                  "Documentation": __urldocs__},
     packages=find_packages(include=["casm*"], exclude=["tests"]),
     install_requires=all_requirements())
