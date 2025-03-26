@@ -4,3 +4,7 @@ services:
   worker:
     image: "my-worker-image:latest"
     container_name: ${COMPOSE_PROJECT_NAME}-worker
+
+  tasker:
+    image: "my-tasker-image:latest"
+    container_name: ${COMPOSE_PROJECT_NAME}-tasker

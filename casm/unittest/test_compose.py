@@ -127,3 +127,7 @@ class Test_compose_file(unittest.TestCase):
         self.assertIsInstance(service.volumes, service_volumes)
         self.assertIsInstance(service.deploy, service_deploy)
         del self.compose_file.services["unittest"]
+
+
+if __name__ == "__main__":
+    unittest.main()

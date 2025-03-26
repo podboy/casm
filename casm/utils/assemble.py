@@ -28,7 +28,7 @@ class assemble_variables(Dict[str, str]):
         if variables is None:
             variables = dict()
         assert isinstance(variables, dict)
-        vars = {k: v for k, v in os.environ.items()}
+        vars: Dict[str, str] = {k: v for k, v in os.environ.items()}
         for k, v in variables.items():
             assert v is not None, f'variable "{k}" not set'
             assert isinstance(v, str), f"{type(v)} not str"
@@ -80,10 +80,10 @@ class assemble_file:
         if project_name is None:
             project_name = default_project_name(filepath)
         assert isinstance(template_file, str) or template_file is None
-        self.__abspath = os.path.abspath(filepath)
-        self.__basedir = os.path.dirname(self.__abspath)
-        self.__filepath = filepath
-        self.__template_file = template_file
+        self.__abspath: str = os.path.abspath(filepath)
+        self.__basedir: str = os.path.dirname(self.__abspath)
+        self.__filepath: str = filepath
+        self.__template_file: Optional[str] = template_file
         data = safe_load_file(filepath) if os.path.isfile(filepath) else dict()
         self.__assemble: Dict[str, Any] = dict() if data is None else data
         self.__project_name: str = self.__assemble.get(self.KEY_PROJECT_NAME,

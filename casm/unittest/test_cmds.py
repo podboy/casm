@@ -7,10 +7,12 @@ import shutil
 import sys
 from typing import List
 import unittest
-
-import mock
+from unittest import mock
 
 from casm.cmds import main as casm
+from casm.cmds.modify import template
+from casm.cmds.podman import container
+from casm.cmds.podman import guard
 from casm.cmds.podman import main as cman
 from casm.utils.podman import podman_container
 
@@ -202,12 +204,17 @@ class Test_casm(unittest.TestCase):
         ]
         mock_system.assert_has_calls(calls)
 
+    def test_modify_assemble(self):
+        self.assertEqual(casm(["--template", self.template, "modify", "assemble"]), 0)  # noqa:E501
+
+    @mock.patch.object(template.assemble_file, "dump_template", mock.MagicMock())  # noqa:E501
     def test_modify_template_services(self):
         template = os.path.join("example", "modify", "services.yml")
         output = template + ".out"
         cmds: List[str] = ["--template", template, "modify", "template",
                            "--output", output, "services",
-                           "--mount-localtime", "--privileged", "--systemd"]
+                           "--mount-localtime", "--privileged", "--systemd",
+                           "worker"]
         self.assertEqual(casm(cmds), 0)
 
     def test_services(self):
@@ -215,6 +222,20 @@ class Test_casm(unittest.TestCase):
         self.assertEqual(casm(cmds), 0)
         self.assertEqual(casm(cmds + ["--service-name"]), 0)
         self.assertEqual(casm(cmds + ["--container-name"]), 0)
+
+    def test_guard(self):
+        cmds: List[str] = ["--template", self.template, "guard"]
+        self.assertEqual(casm(cmds), 0)
+
+    @mock.patch.object(guard.podman_container, "generate_guard_task", mock.MagicMock())  # noqa:E501
+    def test_guard_generate(self):
+        cmds: List[str] = ["--template", self.template, "guard", "generate", "worker"]  # noqa:E501
+        self.assertEqual(casm(cmds), 0)
+
+    @mock.patch.object(guard.podman_container, "destroy_guard_task", mock.MagicMock())  # noqa:E501
+    def test_guard_destroy(self):
+        cmds: List[str] = ["--template", self.template, "guard", "destroy", "worker"]  # noqa:E501
+        self.assertEqual(casm(cmds), 0)
 
 
 class Test_cman(unittest.TestCase):
@@ -233,6 +254,26 @@ class Test_cman(unittest.TestCase):
     def tearDown(self):
         pass
 
+    def test_container(self):
+        cmds: List[str] = ["container"]
+        self.assertEqual(cman(cmds), 0)
+
+    @mock.patch.object(container.podman_container, "list")
+    @mock.patch.object(container.podman_container, "guard")
+    def test_container_guard(self, mock_guard, mock_list):
+        mock_guard.side_effect = [0, 0]
+        mock_list.return_value = ["unit", "test"]
+        cmds: List[str] = ["container", "guard", "unit", "test"]
+        self.assertEqual(cman(cmds), 0)
+
+    @mock.patch.object(container.podman_container, "list")
+    @mock.patch.object(container.podman_container, "guard")
+    def test_container_guard_exit(self, mock_guard, mock_list):
+        mock_guard.side_effect = [0, 123456]
+        mock_list.return_value = ["unit", "test"]
+        cmds: List[str] = ["container", "guard", "unit", "test"]
+        self.assertEqual(cman(cmds), 123456)
+
     @mock.patch.object(os, "system")
     def test_system_prune(self, mock_system: mock.Mock):
         mock_system.side_effect = [0]
@@ -240,3 +281,7 @@ class Test_cman(unittest.TestCase):
         self.assertEqual(cman(cmds), 0)
         cmd = f"{shutil.which('podman')} system prune"
         mock_system.assert_called_once_with(cmd)
+
+
+if __name__ == "__main__":
+    unittest.main()
