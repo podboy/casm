@@ -2,9 +2,12 @@
 # coding:utf-8
 
 from errno import ENOENT
+from errno import ESRCH
 import os
 import shutil
 import sys
+from threading import Thread
+from time import time
 from typing import List
 import unittest
 from unittest import mock
@@ -273,6 +276,16 @@ class Test_cman(unittest.TestCase):
         mock_list.return_value = ["unit", "test"]
         cmds: List[str] = ["container", "guard", "unit", "test"]
         self.assertEqual(cman(cmds), 123456)
+
+    @mock.patch.object(container.podman_container, "list")
+    @mock.patch.object(container.podman_container, "daemon")
+    def test_container_guard_daemon(self, mock_daemon, mock_list):
+        fake_daemon = Thread(target=lambda: time())
+        fake_daemon.start()
+        mock_daemon.side_effect = [fake_daemon]
+        mock_list.return_value = ["unit", "test"]
+        cmds: List[str] = ["container", "guard", "--daemon", "test"]
+        self.assertEqual(cman(cmds), ESRCH)
 
     @mock.patch.object(os, "system")
     def test_system_prune(self, mock_system: mock.Mock):

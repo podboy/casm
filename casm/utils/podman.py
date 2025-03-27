@@ -4,7 +4,9 @@ import getpass
 from grp import getgrnam
 import os
 from pwd import getpwnam
+from random import randint
 import shutil
+from threading import Thread
 from typing import Any
 from typing import Dict
 from typing import Iterable
@@ -14,6 +16,8 @@ from typing import Tuple
 
 from podman import PodmanClient
 from podman.domain.containers import Container
+from xkits import DaemonTaskJob
+from xkits import DelayTaskJob
 from xmanage import systemd_service
 
 from .common import mountpoint
@@ -305,6 +309,19 @@ WantedBy=default.target
         def __restart() -> int:
             return self.restart() if self.restart_service() != 0 else 0
         return __restart() if not self.healthy else 0
+
+    def daemon(self, block: bool = True, min_delay: int = 180, max_delay: int = 3600) -> Optional[Thread]:  # noqa:E501
+        max_delay = max(min_delay + 120, max_delay)
+
+        def __daemon(task: DelayTaskJob, min_delay: int, max_delay: int) -> bool:  # noqa:E501
+            success: bool = task.run() is True and task.result == 0
+            delay: float = task.delay_time * (1.2 if success else 0.8)
+            task.renew(delay=min(max(min_delay, delay), max_delay))
+            return success
+
+        delay_job: DelayTaskJob = DelayTaskJob.create_delay_task(randint(min_delay, min_delay + 120), self.guard)  # noqa:E501
+        daemon_job: DaemonTaskJob = DaemonTaskJob.create_daemon_task(__daemon, delay_job, min_delay, max_delay)  # noqa:E501
+        return daemon_job.run() if block else daemon_job.run_in_background()
 
     @classmethod
     def list(cls, all: bool = False) -> Tuple[str, ...]:
