@@ -18,6 +18,7 @@ from podman import PodmanClient
 from podman.domain.containers import Container
 from xkits import DaemonTaskJob
 from xkits import DelayTaskJob
+from xkits import Logger
 from xmanage import systemd_service
 
 from .common import mountpoint
@@ -307,6 +308,7 @@ WantedBy=default.target
 
     def guard(self) -> int:
         def __restart() -> int:
+            Logger.stderr_red(f"container {self.container_name} restarting")
             return self.restart() if self.restart_service() != 0 else 0
         return __restart() if not self.healthy else 0
 
@@ -315,12 +317,15 @@ WantedBy=default.target
 
         def __daemon(task: DelayTaskJob, min_delay: int, max_delay: int) -> bool:  # noqa:E501
             success: bool = task.run() is True and task.result == 0
+            Logger.stderr(f"container {self.container_name} guard task {'success' if success else 'failure'}")  # noqa:E501
             delay: float = task.delay_time * (1.2 if success else 0.8)
             task.renew(delay=min(max(min_delay, delay), max_delay))
+            Logger.stderr(f"container {self.container_name} guard task will run again in {task.delay_time} seconds")  # noqa:E501
             return success
 
         delay_job: DelayTaskJob = DelayTaskJob.create_delay_task(randint(min_delay, min_delay + 120), self.guard)  # noqa:E501
         daemon_job: DaemonTaskJob = DaemonTaskJob.create_daemon_task(__daemon, delay_job, min_delay, max_delay)  # noqa:E501
+        Logger.stderr(f"container {self.container_name} guard task will start in {delay_job.delay_time} seconds")  # noqa:E501
         return daemon_job.run() if block else daemon_job.run_in_background()
 
     @classmethod
