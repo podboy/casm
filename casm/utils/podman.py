@@ -318,7 +318,7 @@ WantedBy=default.target
         def __daemon(task: DelayTaskJob, min_delay: int, max_delay: int) -> bool:  # noqa:E501
             success: bool = task.run() is True and task.result == 0
             Logger.stderr(f"container {self.container_name} guard task {'success' if success else 'failure'}")  # noqa:E501
-            delay: float = task.delay_time * (1.2 if success else 0.8)
+            delay: float = task.delay_time * 1.1 if success else task.delay_time * 0.1  # noqa:E501
             task.renew(delay=min(max(min_delay, delay), max_delay))
             Logger.stderr(f"container {self.container_name} guard task will run again in {task.delay_time} seconds")  # noqa:E501
             return success
