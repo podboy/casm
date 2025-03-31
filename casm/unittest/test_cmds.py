@@ -12,7 +12,7 @@ from typing import List
 import unittest
 from unittest import mock
 
-from casm.cmds import main as casm
+from casm.cmds.casm import main as casm
 from casm.cmds.modify import template
 from casm.cmds.podman import container
 from casm.cmds.podman import guard

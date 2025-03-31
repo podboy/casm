@@ -8,8 +8,8 @@ from xkits_command import Command
 from xkits_command import CommandArgument
 from xkits_command import CommandExecutor
 
-from casm.cmds.service import add_pos_services
-from casm.cmds.service import filter_services
+from casm.cmds.podman_compose.service import add_pos_services
+from casm.cmds.podman_compose.service import filter_services
 from casm.utils import assemble_file
 
 
