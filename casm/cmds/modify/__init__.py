@@ -5,8 +5,8 @@ from xkits_command import Command
 from xkits_command import CommandArgument
 from xkits_command import CommandExecutor
 
-from .assemble import add_cmd_assemble
-from .template import add_cmd_template
+from casm.cmds.modify.assemble import add_cmd_assemble
+from casm.cmds.modify.template import add_cmd_template
 
 
 @CommandArgument("modify", help="Modify assemble or template")

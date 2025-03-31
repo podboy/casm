@@ -8,10 +8,10 @@ from typing import Optional
 
 from podman_compose import norm_re
 
-from .compose import compose_file
-from .yaml import safe_dump_file
-from .yaml import safe_load_data
-from .yaml import safe_load_file
+from casm.utils.compose import compose_file
+from casm.utils.yaml import safe_dump_file
+from casm.utils.yaml import safe_load_data
+from casm.utils.yaml import safe_load_file
 
 
 def default_project_name(filepath: str):

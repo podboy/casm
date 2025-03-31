@@ -12,7 +12,7 @@ from xkits_command import Command
 from xkits_command import CommandArgument
 from xkits_command import CommandExecutor
 
-from ...utils import podman_container
+from casm.utils import podman_container
 
 
 def add_pos_containers(_arg: ArgParser):

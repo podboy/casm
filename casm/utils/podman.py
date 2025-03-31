@@ -21,7 +21,7 @@ from xkits_thread.task import DaemonTaskJob
 from xkits_thread.task import DelayTaskJob
 from xmanage import systemd_service
 
-from .common import mountpoint
+from casm.utils.common import mountpoint
 
 # UID: int = os.getuid()
 CMD: Optional[str] = shutil.which("podman")

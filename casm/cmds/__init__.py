@@ -10,25 +10,25 @@ from xkits_command import Command
 from xkits_command import CommandArgument
 from xkits_command import CommandExecutor
 
-from ..utils import __project__
-from ..utils import __urlhome__
-from ..utils import __version__
-from ..utils import assemble_file
-from .modify import add_cmd_modify
-from .podman import add_cmd_guard
-from .podman import add_cmd_system
-from .podman import add_cmd_systemd
-from .podman_compose import add_cmd_down
-from .podman_compose import add_cmd_exec
-from .podman_compose import add_cmd_logs
-from .podman_compose import add_cmd_pause
-from .podman_compose import add_cmd_pull
-from .podman_compose import add_cmd_restart
-from .podman_compose import add_cmd_start
-from .podman_compose import add_cmd_stop
-from .podman_compose import add_cmd_unpause
-from .podman_compose import add_cmd_up
-from .service import add_cmd_services
+from casm.cmds.modify import add_cmd_modify
+from casm.cmds.podman import add_cmd_guard
+from casm.cmds.podman import add_cmd_system
+from casm.cmds.podman import add_cmd_systemd
+from casm.cmds.podman_compose.down import add_cmd_down
+from casm.cmds.podman_compose.exec import add_cmd_exec
+from casm.cmds.podman_compose.logs import add_cmd_logs
+from casm.cmds.podman_compose.pause import add_cmd_pause
+from casm.cmds.podman_compose.pull import add_cmd_pull
+from casm.cmds.podman_compose.restart import add_cmd_restart
+from casm.cmds.podman_compose.start import add_cmd_start
+from casm.cmds.podman_compose.stop import add_cmd_stop
+from casm.cmds.podman_compose.unpause import add_cmd_unpause
+from casm.cmds.podman_compose.up import add_cmd_up
+from casm.cmds.service import add_cmd_services
+from casm.utils import __project__
+from casm.utils import __urlhome__
+from casm.utils import __version__
+from casm.utils import assemble_file
 
 DEF_INSTANCE = assemble_file.DEF_CONFIG_FILE
 

@@ -8,12 +8,12 @@ from xkits_command import Command
 from xkits_command import CommandArgument
 from xkits_command import CommandExecutor
 
-from ...utils import __urlhome__
-from ...utils import __version__
-from .container import add_cmd_container
-from .guard import add_cmd_guard  # noqa:F401
-from .system import add_cmd_system
-from .systemd import add_cmd_systemd  # noqa:F401
+from casm.cmds.podman.container import add_cmd_container
+from casm.cmds.podman.guard import add_cmd_guard  # noqa:F401
+from casm.cmds.podman.system import add_cmd_system
+from casm.cmds.podman.systemd import add_cmd_systemd  # noqa:F401
+from casm.utils import __urlhome__
+from casm.utils import __version__
 
 
 @CommandArgument("cman")
