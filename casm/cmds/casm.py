@@ -10,6 +10,9 @@ from xkits_command import Command
 from xkits_command import CommandArgument
 from xkits_command import CommandExecutor
 
+from casm.attribute import __project__
+from casm.attribute import __urlhome__
+from casm.attribute import __version__
 from casm.cmds.modify import add_cmd_modify
 from casm.cmds.podman.system import add_cmd_system
 from casm.cmds.podman_compose.down import add_cmd_down
@@ -25,9 +28,6 @@ from casm.cmds.podman_compose.stop import add_cmd_stop
 from casm.cmds.podman_compose.systemd import add_cmd_systemd
 from casm.cmds.podman_compose.unpause import add_cmd_unpause
 from casm.cmds.podman_compose.up import add_cmd_up
-from casm.utils import __project__
-from casm.utils import __urlhome__
-from casm.utils import __version__
 from casm.utils import assemble_file
 
 DEF_INSTANCE = assemble_file.DEF_CONFIG_FILE

@@ -8,10 +8,10 @@ from xkits_command import Command
 from xkits_command import CommandArgument
 from xkits_command import CommandExecutor
 
+from casm.attribute import __urlhome__
+from casm.attribute import __version__
 from casm.cmds.podman.container import add_cmd_container
 from casm.cmds.podman.system import add_cmd_system
-from casm.utils import __urlhome__
-from casm.utils import __version__
 
 
 @CommandArgument("cman")
