@@ -144,8 +144,7 @@ class podman_container_inspect:
 
 
 class podman_container:
-    '''Manage podman container
-    '''
+    """Manage podman container"""
     BASEURL: str = "unix:///run/podman/podman.sock"
 
     def __init__(self, container_name: str):
@@ -337,8 +336,7 @@ WantedBy=default.target
 
 
 class podman_cmd:
-    '''Execute podman command
-    '''
+    """Execute podman command"""
 
     def __init__(self):
         pass

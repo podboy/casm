@@ -6,8 +6,7 @@ from typing import Optional
 
 
 class podman_compose_cmd:
-    '''Execute podman_compose command
-    '''
+    """Execute podman_compose command"""
 
     def __init__(self, compose_file: Optional[str]):
         if isinstance(compose_file, str):

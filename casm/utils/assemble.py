@@ -63,8 +63,7 @@ class assemble_variables(Dict[str, str]):
 
 
 class assemble_file:
-    '''assemble file, default assemble.yml
-    '''
+    """assemble file, default assemble.yml"""
 
     DEF_CONFIG_FILE = "assemble.yml"
     DEF_TEMPLATE_FILE = "template.yml"
