@@ -267,12 +267,9 @@ WantedBy=default.target
 
     def enable_service(self, restart_policy: str = "on-failure") -> int:
         service = self.generate_service(restart_policy=restart_policy)
-        service.create_unit(unit=self.service_unit)
-
-        errno = os.system(f"systemctl enable --now {self.service_unit}")
-        if errno != 0:
-            return errno
-        return 0
+        service_unit: str = service.create_unit(unit=self.service_unit)
+        Logger.stdout_green(f"create container service unit: {service_unit}")
+        return os.system(f"systemctl enable --now {self.service_unit}")
 
     def disable_service(self) -> int:
         errno = os.system(f"systemctl stop {self.service_unit}")
@@ -281,8 +278,7 @@ WantedBy=default.target
         errno = os.system(f"systemctl disable {self.service_unit}")
         if errno != 0:
             return errno
-        systemd_service.delete_unit(unit=self.service_unit)
-        return 0
+        return 0 if systemd_service.delete_unit(unit=self.service_unit) else EEXIST  # noqa:E501
 
     def guard(self) -> int:
         def __restart() -> int:
