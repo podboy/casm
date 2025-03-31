@@ -319,12 +319,12 @@ WantedBy=default.target
             Logger.stderr(f"container {self.container_name} guard task {'success' if success else 'failure'}")  # noqa:E501
             delay: float = task.delay_time * 1.1 if success else task.delay_time * 0.1  # noqa:E501
             task.renew(delay=min(max(min_delay, delay), max_delay))
-            Logger.stderr(f"container {self.container_name} guard task will run again in {task.delay_time} seconds")  # noqa:E501
+            Logger.stderr(f"container {self.container_name} guard task will run again in {task.delay_time:.1f} seconds")  # noqa:E501
             return success
 
         delay_job: DelayTaskJob = DelayTaskJob.create_delay_task(randint(min_delay, min_delay + 120), self.guard)  # noqa:E501
         daemon_job: DaemonTaskJob = DaemonTaskJob.create_daemon_task(__daemon, delay_job, min_delay, max_delay)  # noqa:E501
-        Logger.stderr(f"container {self.container_name} guard task will start in {delay_job.delay_time} seconds")  # noqa:E501
+        Logger.stderr(f"container {self.container_name} guard task will start in {delay_job.delay_time:.1f} seconds")  # noqa:E501
         return daemon_job.run() if block else daemon_job.run_in_background()
 
     @classmethod
