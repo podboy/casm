@@ -176,23 +176,24 @@ class podman_container:
 
     @property
     def healthy(self) -> bool:
-        inspect = self.inspect()
-
-        def __restarting() -> bool:
+        def _restarting(inspect: podman_container_inspect) -> bool:
             return inspect.State.Restarting
 
-        def __running() -> bool:
+        def _running(inspect: podman_container_inspect) -> bool:
             return inspect.State.Status == "running" and\
                 inspect.State.Running and\
                 not inspect.State.Paused and\
                 not inspect.State.OOMKilled and\
                 not inspect.State.Dead
 
-        def __healthy() -> bool:
+        def _healthy(inspect: podman_container_inspect) -> bool:
             health = inspect.State.Health
             return health is None or health.Status == "healthy"
 
-        return __restarting() or __running() and __healthy()
+        with PodmanClient(base_url=self.BASEURL) as client:
+            container: Container = client.containers.get(self.container_name)
+            inspect: podman_container_inspect = podman_container_inspect(container)  # noqa:E501
+            return _restarting(inspect) or _running(inspect) and _healthy(inspect)  # noqa:E501
 
     def stop(self) -> int:
         return os.system(f"podman container stop {self.container_name}")
