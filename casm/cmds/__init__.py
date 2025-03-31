@@ -5,10 +5,10 @@ import os
 from typing import Optional
 from typing import Sequence
 
-from xkits import add_command
-from xkits import argp
-from xkits import commands
-from xkits import run_command
+from xkits_command import ArgParser
+from xkits_command import Command
+from xkits_command import CommandArgument
+from xkits_command import CommandExecutor
 
 from ..utils import __project__
 from ..utils import __urlhome__
@@ -33,8 +33,8 @@ from .service import add_cmd_services
 DEF_INSTANCE = assemble_file.DEF_CONFIG_FILE
 
 
-@add_command(__project__)
-def add_cmd(_arg: argp):
+@CommandArgument(__project__)
+def add_cmd(_arg: ArgParser):
     _arg.add_argument("--instance", type=str, nargs=1, metavar="INSTANC",
                       help=f"YAML format config file, default {DEF_INSTANCE}")
     _arg.add_argument("--template", type=str, nargs=1, metavar="TEMPLATE",
@@ -46,12 +46,12 @@ def add_cmd(_arg: argp):
                       help="Set environment variables")
 
 
-@run_command(add_cmd, add_cmd_pull, add_cmd_up, add_cmd_down,
-             add_cmd_start, add_cmd_stop, add_cmd_restart,
-             add_cmd_pause, add_cmd_unpause, add_cmd_exec, add_cmd_logs,
-             add_cmd_system, add_cmd_systemd, add_cmd_guard,
-             add_cmd_services, add_cmd_modify)
-def run_cmd(cmds: commands) -> int:
+@CommandExecutor(add_cmd, add_cmd_pull, add_cmd_up, add_cmd_down,
+                 add_cmd_start, add_cmd_stop, add_cmd_restart,
+                 add_cmd_pause, add_cmd_unpause, add_cmd_exec, add_cmd_logs,
+                 add_cmd_system, add_cmd_systemd, add_cmd_guard,
+                 add_cmd_services, add_cmd_modify)
+def run_cmd(cmds: Command) -> int:
     instance: str = DEF_INSTANCE
     if isinstance(cmds.args.instance, list):
         instance = cmds.args.instance[0]
@@ -86,7 +86,7 @@ def run_cmd(cmds: commands) -> int:
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
-    cmds = commands()
+    cmds = Command()
     cmds.version = __version__
     return cmds.run(
         root=add_cmd,

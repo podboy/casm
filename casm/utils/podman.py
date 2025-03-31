@@ -16,9 +16,9 @@ from typing import Tuple
 
 from podman import PodmanClient
 from podman.domain.containers import Container
-from xkits import DaemonTaskJob
-from xkits import DelayTaskJob
-from xkits import Logger
+from xkits_logger.logger import Logger
+from xkits_thread.task import DaemonTaskJob
+from xkits_thread.task import DelayTaskJob
 from xmanage import systemd_service
 
 from .common import mountpoint

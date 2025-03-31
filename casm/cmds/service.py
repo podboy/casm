@@ -8,10 +8,10 @@ from typing import List
 from typing import Optional
 from typing import Union
 
-from xkits import add_command
-from xkits import argp
-from xkits import commands
-from xkits import run_command
+from xkits_command import ArgParser
+from xkits_command import Command
+from xkits_command import CommandArgument
+from xkits_command import CommandExecutor
 
 from ..utils import assemble_file
 from ..utils import compose_services
@@ -70,7 +70,7 @@ def list_services() -> Optional[List[Union[str, List[Any]]]]:
     return global_svrs
 
 
-def add_pos_services(_arg: argp):
+def add_pos_services(_arg: ArgParser):
     _arg.add_argument(dest="services", type=str, nargs="*", metavar="SERVICE",
                       action="extend", choices=list_services(),
                       help="Specify services, default ALL")
@@ -81,8 +81,8 @@ def filter_services(assemble: assemble_file, services: List[str]) -> List[str]:
     return [s for s in names if s in services]
 
 
-@add_command("services", help="List all services")
-def add_cmd_services(_arg: argp):
+@CommandArgument("services", help="List all services")
+def add_cmd_services(_arg: ArgParser):
     mgrp = _arg.add_mutually_exclusive_group()
     mgrp.add_argument("--service-name", action="store_true",
                       help="Only output service_name")
@@ -90,8 +90,8 @@ def add_cmd_services(_arg: argp):
                       help="Only output container_name")
 
 
-@run_command(add_cmd_services)
-def run_cmd_services(cmds: commands) -> int:
+@CommandExecutor(add_cmd_services)
+def run_cmd_services(cmds: Command) -> int:
     assemble: assemble_file = cmds.args.assemble_file
     assert isinstance(assemble, assemble_file)
     for service in assemble.template.services:

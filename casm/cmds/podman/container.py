@@ -7,23 +7,23 @@ from typing import List
 from typing import Optional
 from typing import Set
 
-from xkits import add_command  # noqa:H306
-from xkits import argp
-from xkits import commands
-from xkits import run_command
+from xkits_command import ArgParser
+from xkits_command import Command
+from xkits_command import CommandArgument
+from xkits_command import CommandExecutor
 
 from ...utils import podman_container
 
 
-def add_pos_containers(_arg: argp):
+def add_pos_containers(_arg: ArgParser):
     _arg.add_argument(dest="containers", type=str, nargs="*",
                       metavar="CONTAINER", action="extend",
                       choices=list(podman_container.list(all=True)) + [[]],
                       help="Specify containers, default ALL")
 
 
-@add_command("guard", help="Guard podman container")
-def add_cmd_container_guard(_arg: argp):
+@CommandArgument("guard", help="Guard podman container")
+def add_cmd_container_guard(_arg: ArgParser):
     _arg.add_opt_on("--daemon", dest="daemon", help="run in daemon mode")
     _arg.add_argument("--daemon-min-delay", type=int, metavar="SECONDS",
                       help="minimum delay interval in seconds for daemon mode",
@@ -34,8 +34,8 @@ def add_cmd_container_guard(_arg: argp):
     add_pos_containers(_arg)
 
 
-@run_command(add_cmd_container_guard)
-def run_cmd_container_guard(cmds: commands) -> int:
+@CommandExecutor(add_cmd_container_guard)
+def run_cmd_container_guard(cmds: Command) -> int:
     def guard_container(container: podman_container) -> int:
         cmds.logger.info("guard container %s begin", container.container_name)
         exit_code: int = container.guard()
@@ -67,11 +67,11 @@ def run_cmd_container_guard(cmds: commands) -> int:
     return 0
 
 
-@add_command("container", help="Manage podman containers")
-def add_cmd_container(_arg: argp):
+@CommandArgument("container", help="Manage podman containers")
+def add_cmd_container(_arg: ArgParser):
     pass
 
 
-@run_command(add_cmd_container, add_cmd_container_guard)
-def run_cmd_container(cmds: commands) -> int:
+@CommandExecutor(add_cmd_container, add_cmd_container_guard)
+def run_cmd_container(cmds: Command) -> int:
     return 0

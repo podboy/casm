@@ -2,26 +2,26 @@
 
 from typing import List
 
-from xkits import add_command
-from xkits import argp
-from xkits import commands
-from xkits import run_command
+from xkits_command import ArgParser
+from xkits_command import Command
+from xkits_command import CommandArgument
+from xkits_command import CommandExecutor
 
 from ...utils import assemble_file
 from ...utils import podman_container
 from ..service import add_pos_services
 
 
-@add_command("enable", help="Enable systemd unit for containers")
-def add_cmd_enable(_arg: argp):
+@CommandArgument("enable", help="Enable systemd unit for containers")
+def add_cmd_enable(_arg: ArgParser):
     _arg.add_argument("--restart-policy", dest="restart_policy",
                       type=str, nargs=1, metavar="STR", default=["on-failure"],
                       help='Systemd restart-policy (default "on-failure")')
     add_pos_services(_arg)
 
 
-@run_command(add_cmd_enable)
-def run_cmd_enable(cmds: commands) -> int:
+@CommandExecutor(add_cmd_enable)
+def run_cmd_enable(cmds: Command) -> int:
     restart_policy: str = cmds.args.restart_policy[0]
     assemble: assemble_file = cmds.args.assemble_file
     assert isinstance(assemble, assemble_file)
@@ -37,13 +37,13 @@ def run_cmd_enable(cmds: commands) -> int:
     return 0
 
 
-@add_command("disable", help="Disable systemd unit for containers")
-def add_cmd_disable(_arg: argp):
+@CommandArgument("disable", help="Disable systemd unit for containers")
+def add_cmd_disable(_arg: ArgParser):
     add_pos_services(_arg)
 
 
-@run_command(add_cmd_disable)
-def run_cmd_disable(cmds: commands) -> int:
+@CommandExecutor(add_cmd_disable)
+def run_cmd_disable(cmds: Command) -> int:
     assemble: assemble_file = cmds.args.assemble_file
     assert isinstance(assemble, assemble_file)
     services: List[str] = cmds.args.services
@@ -57,11 +57,11 @@ def run_cmd_disable(cmds: commands) -> int:
     return 0
 
 
-@add_command("systemd", help="Manage systemd units")
-def add_cmd_systemd(_arg: argp):
+@CommandArgument("systemd", help="Manage systemd units")
+def add_cmd_systemd(_arg: ArgParser):
     pass
 
 
-@run_command(add_cmd_systemd, add_cmd_enable, add_cmd_disable)
-def run_cmd_systemd(cmds: commands) -> int:
+@CommandExecutor(add_cmd_systemd, add_cmd_enable, add_cmd_disable)
+def run_cmd_systemd(cmds: Command) -> int:
     return 0

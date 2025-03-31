@@ -1,19 +1,19 @@
 # coding:utf-8
 
-from xkits import add_command
-from xkits import argp
-from xkits import commands
-from xkits import run_command
+from xkits_command import ArgParser
+from xkits_command import Command
+from xkits_command import CommandArgument
+from xkits_command import CommandExecutor
 
 from .assemble import add_cmd_assemble
 from .template import add_cmd_template
 
 
-@add_command("modify", help="Modify assemble or template")
-def add_cmd_modify(_arg: argp):
+@CommandArgument("modify", help="Modify assemble or template")
+def add_cmd_modify(_arg: ArgParser):
     pass
 
 
-@run_command(add_cmd_modify, add_cmd_assemble, add_cmd_template)
-def run_cmd_modify(cmds: commands) -> int:
+@CommandExecutor(add_cmd_modify, add_cmd_assemble, add_cmd_template)
+def run_cmd_modify(cmds: Command) -> int:
     return 0

@@ -1,16 +1,16 @@
 # coding:utf-8
 
-from xkits import add_command
-from xkits import argp
-from xkits import commands
-from xkits import run_command
+from xkits_command import ArgParser
+from xkits_command import Command
+from xkits_command import CommandArgument
+from xkits_command import CommandExecutor
 
 
-@add_command("assemble", help="Modify assemble file")
-def add_cmd_assemble(_arg: argp):
+@CommandArgument("assemble", help="Modify assemble file")
+def add_cmd_assemble(_arg: ArgParser):
     pass
 
 
-@run_command(add_cmd_assemble)
-def run_cmd_assemble(cmds: commands) -> int:
+@CommandExecutor(add_cmd_assemble)
+def run_cmd_assemble(cmds: Command) -> int:
     return 0

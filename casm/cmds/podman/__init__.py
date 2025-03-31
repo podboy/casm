@@ -3,10 +3,10 @@
 from typing import Optional
 from typing import Sequence
 
-from xkits import add_command
-from xkits import argp
-from xkits import commands
-from xkits import run_command
+from xkits_command import ArgParser
+from xkits_command import Command
+from xkits_command import CommandArgument
+from xkits_command import CommandExecutor
 
 from ...utils import __urlhome__
 from ...utils import __version__
@@ -16,18 +16,18 @@ from .system import add_cmd_system
 from .systemd import add_cmd_systemd  # noqa:F401
 
 
-@add_command("cman")
-def add_cmd(_arg: argp):
+@CommandArgument("cman")
+def add_cmd(_arg: ArgParser):
     pass
 
 
-@run_command(add_cmd, add_cmd_container, add_cmd_system)
-def run_cmd(cmds: commands) -> int:
+@CommandExecutor(add_cmd, add_cmd_container, add_cmd_system)
+def run_cmd(cmds: Command) -> int:
     return 0
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
-    cmds = commands()
+    cmds = Command()
     cmds.version = __version__
     return cmds.run(
         root=add_cmd,

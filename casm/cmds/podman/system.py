@@ -1,28 +1,28 @@
 # coding:utf-8
 
-from xkits import add_command
-from xkits import argp
-from xkits import commands
-from xkits import run_command
+from xkits_command import ArgParser
+from xkits_command import Command
+from xkits_command import CommandArgument
+from xkits_command import CommandExecutor
 
 from ...utils import podman_cmd
 
 
-@add_command("prune", help="Remove unused data")
-def add_cmd_prune(_arg: argp):
+@CommandArgument("prune", help="Remove unused data")
+def add_cmd_prune(_arg: ArgParser):
     pass
 
 
-@run_command(add_cmd_prune)
-def run_cmd_prune(cmds: commands) -> int:
+@CommandExecutor(add_cmd_prune)
+def run_cmd_prune(cmds: Command) -> int:
     return podman_cmd.system_prune()
 
 
-@add_command("system", help="Manage podman")
-def add_cmd_system(_arg: argp):
+@CommandArgument("system", help="Manage podman")
+def add_cmd_system(_arg: ArgParser):
     pass
 
 
-@run_command(add_cmd_system, add_cmd_prune)
-def run_cmd_system(cmds: commands) -> int:
+@CommandExecutor(add_cmd_system, add_cmd_prune)
+def run_cmd_system(cmds: Command) -> int:
     return 0

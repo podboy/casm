@@ -2,10 +2,10 @@
 
 from typing import List
 
-from xkits import add_command
-from xkits import argp
-from xkits import commands
-from xkits import run_command
+from xkits_command import ArgParser
+from xkits_command import Command
+from xkits_command import CommandArgument
+from xkits_command import CommandExecutor
 
 from ...utils import assemble_file
 from ...utils import podman_compose_cmd
@@ -13,16 +13,16 @@ from ..service import add_pos_services
 from ..service import filter_services
 
 
-@add_command("logs", help="Show logs from containers")
-def add_cmd_logs(_arg: argp):
+@CommandArgument("logs", help="Show logs from containers")
+def add_cmd_logs(_arg: ArgParser):
     _arg.add_opt_on("--follow", help="Follow log output, default is false")
     _arg.add_argument("--tail", type=int, nargs=1, metavar="LINES",
                       help="Number of lines from the end for each container")
     add_pos_services(_arg)
 
 
-@run_command(add_cmd_logs)
-def run_cmd_logs(cmds: commands) -> int:
+@CommandExecutor(add_cmd_logs)
+def run_cmd_logs(cmds: Command) -> int:
     assemble: assemble_file = cmds.args.assemble_file
     assert isinstance(assemble, assemble_file)
     services: List[str] = filter_services(assemble, cmds.args.services)

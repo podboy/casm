@@ -2,23 +2,23 @@
 
 from typing import List
 
-from xkits import add_command
-from xkits import argp
-from xkits import commands
-from xkits import run_command
+from xkits_command import ArgParser
+from xkits_command import Command
+from xkits_command import CommandArgument
+from xkits_command import CommandExecutor
 
 from ...utils import assemble_file
 from ...utils import podman_container
 from ..service import add_pos_services
 
 
-@add_command("generate", help="Generate container guard crontab")
-def add_cmd_guard_generate(_arg: argp):
+@CommandArgument("generate", help="Generate container guard crontab")
+def add_cmd_guard_generate(_arg: ArgParser):
     add_pos_services(_arg)
 
 
-@run_command(add_cmd_guard_generate)
-def run_cmd_guard_generate(cmds: commands) -> int:
+@CommandExecutor(add_cmd_guard_generate)
+def run_cmd_guard_generate(cmds: Command) -> int:
     assemble: assemble_file = cmds.args.assemble_file
     assert isinstance(assemble, assemble_file)
     services: List[str] = cmds.args.services
@@ -32,13 +32,13 @@ def run_cmd_guard_generate(cmds: commands) -> int:
     return 0
 
 
-@add_command("destroy", help="Destroy container guard crontab")
-def add_cmd_guard_destroy(_arg: argp):
+@CommandArgument("destroy", help="Destroy container guard crontab")
+def add_cmd_guard_destroy(_arg: ArgParser):
     add_pos_services(_arg)
 
 
-@run_command(add_cmd_guard_destroy)
-def run_cmd_guard_destroy(cmds: commands) -> int:
+@CommandExecutor(add_cmd_guard_destroy)
+def run_cmd_guard_destroy(cmds: Command) -> int:
     assemble: assemble_file = cmds.args.assemble_file
     assert isinstance(assemble, assemble_file)
     services: List[str] = cmds.args.services
@@ -52,11 +52,11 @@ def run_cmd_guard_destroy(cmds: commands) -> int:
     return 0
 
 
-@add_command("guard", help="Manage containers guard")
-def add_cmd_guard(_arg: argp):
+@CommandArgument("guard", help="Manage containers guard")
+def add_cmd_guard(_arg: ArgParser):
     pass
 
 
-@run_command(add_cmd_guard, add_cmd_guard_generate, add_cmd_guard_destroy)
-def run_cmd_guard(cmds: commands) -> int:
+@CommandExecutor(add_cmd_guard, add_cmd_guard_generate, add_cmd_guard_destroy)
+def run_cmd_guard(cmds: Command) -> int:
     return 0

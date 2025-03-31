@@ -3,17 +3,17 @@
 import os
 from typing import List
 
-from xkits import add_command
-from xkits import argp
-from xkits import commands
-from xkits import run_command
+from xkits_command import ArgParser
+from xkits_command import Command
+from xkits_command import CommandArgument
+from xkits_command import CommandExecutor
 
 from ...utils import assemble_file
 from ..service import add_pos_services
 from ..service import filter_services
 
 
-def dump(cmds: commands) -> int:
+def dump(cmds: Command) -> int:
     assemble: assemble_file = cmds.args.assemble_file
     assert isinstance(assemble, assemble_file)
 
@@ -28,16 +28,16 @@ def dump(cmds: commands) -> int:
     return 0
 
 
-@add_command("services", help="Modify services")
-def add_cmd_services(_arg: argp):
+@CommandArgument("services", help="Modify services")
+def add_cmd_services(_arg: ArgParser):
     _arg.add_opt_on("--mount-localtime", help="Mount host localtime")
     _arg.add_opt_on("--privileged", help="Give extended privileges")
     _arg.add_opt_on("--systemd", help="Control via systemctl")
     add_pos_services(_arg)
 
 
-@run_command(add_cmd_services)
-def run_cmd_services(cmds: commands) -> int:
+@CommandExecutor(add_cmd_services)
+def run_cmd_services(cmds: Command) -> int:
     assemble: assemble_file = cmds.args.assemble_file
     assert isinstance(assemble, assemble_file)
     services: List[str] = filter_services(assemble, cmds.args.services)
@@ -55,12 +55,12 @@ def run_cmd_services(cmds: commands) -> int:
     return dump(cmds)
 
 
-@add_command("template", help="Modify template file")
-def add_cmd_template(_arg: argp):
+@CommandArgument("template", help="Modify template file")
+def add_cmd_template(_arg: ArgParser):
     _arg.add_argument("--output", type=str, nargs=1, metavar="PATH",
                       help="Specify output file")
 
 
-@run_command(add_cmd_template, add_cmd_services)
-def run_cmd_template(cmds: commands) -> int:
+@CommandExecutor(add_cmd_template, add_cmd_services)
+def run_cmd_template(cmds: Command) -> int:
     return 0

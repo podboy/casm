@@ -1,16 +1,16 @@
 # coding:utf-8
 
-from xkits import add_command
-from xkits import argp
-from xkits import commands
-from xkits import run_command
+from xkits_command import ArgParser
+from xkits_command import Command
+from xkits_command import CommandArgument
+from xkits_command import CommandExecutor
 
 from ...utils import assemble_file
 from ...utils import podman_compose_cmd
 
 
-@add_command("exec", help="Execute a command in a running container")
-def add_cmd_exec(_arg: argp):
+@CommandArgument("exec", help="Execute a command in a running container")
+def add_cmd_exec(_arg: ArgParser):
     _arg.add_opt_on("-d", "--detach", help="Detached mode")
     _arg.add_opt_on("--privileged", help="Default is false")
     _arg.add_argument("-u", "--user", type=str, nargs=1, metavar="USER",
@@ -24,8 +24,8 @@ def add_cmd_exec(_arg: argp):
                       action="extend", help="Command and its arguments")
 
 
-@run_command(add_cmd_exec)
-def run_cmd_exec(cmds: commands) -> int:
+@CommandExecutor(add_cmd_exec)
+def run_cmd_exec(cmds: Command) -> int:
     assemble: assemble_file = cmds.args.assemble_file
     assert isinstance(assemble, assemble_file)
     assert isinstance(cmds.args.service, list) and len(cmds.args.service) == 1
