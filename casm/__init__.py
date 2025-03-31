@@ -1,6 +1,5 @@
 # coding:utf-8
 
-from casm.utils import __version__  # noqa:F401
 from casm.utils import assemble_file  # noqa:F401
 from casm.utils import compose_file  # noqa:F401
 from casm.utils import compose_network  # noqa:F401

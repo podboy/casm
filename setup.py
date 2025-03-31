@@ -3,15 +3,15 @@
 from setuptools import find_packages
 from setuptools import setup
 
-from casm.utils.attribute import __author__
-from casm.utils.attribute import __author_email__
-from casm.utils.attribute import __description__
-from casm.utils.attribute import __project__
-from casm.utils.attribute import __urlbugs__
-from casm.utils.attribute import __urlcode__
-from casm.utils.attribute import __urldocs__
-from casm.utils.attribute import __urlhome__
-from casm.utils.attribute import __version__
+from casm.attribute import __author__
+from casm.attribute import __author_email__
+from casm.attribute import __description__
+from casm.attribute import __project__
+from casm.attribute import __urlbugs__
+from casm.attribute import __urlcode__
+from casm.attribute import __urldocs__
+from casm.attribute import __urlhome__
+from casm.attribute import __version__
 
 
 def all_requirements():
