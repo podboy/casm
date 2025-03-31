@@ -5,8 +5,8 @@ from xkits_command import Command
 from xkits_command import CommandArgument
 from xkits_command import CommandExecutor
 
-from casm.utils import assemble_file
-from casm.utils import podman_compose_cmd
+from casm.utils.assemble import assemble_file
+from casm.utils.podman_compose import podman_compose_cmd
 
 
 @CommandArgument("exec", help="Execute a command in a running container")

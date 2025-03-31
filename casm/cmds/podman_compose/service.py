@@ -13,9 +13,9 @@ from xkits_command import Command
 from xkits_command import CommandArgument
 from xkits_command import CommandExecutor
 
-from casm.utils import assemble_file
-from casm.utils import compose_services
-from casm.utils import safe_load_file
+from casm.utils.assemble import assemble_file
+from casm.utils.compose import compose_services
+from casm.utils.yaml import safe_load_file
 
 global_argv: Optional[List[str]] = None
 global_svrs: Optional[List[Union[str, List[Any]]]] = None

@@ -5,7 +5,7 @@ from xkits_command import Command
 from xkits_command import CommandArgument
 from xkits_command import CommandExecutor
 
-from casm.utils import podman_cmd
+from casm.utils.podman import podman_cmd
 
 
 @CommandArgument("prune", help="Remove unused data")

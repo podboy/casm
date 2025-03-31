@@ -9,8 +9,8 @@ from xkits_command import CommandExecutor
 
 from casm.cmds.podman_compose.service import add_pos_services
 from casm.cmds.podman_compose.service import filter_services
-from casm.utils import assemble_file
-from casm.utils import podman_compose_cmd
+from casm.utils.assemble import assemble_file
+from casm.utils.podman_compose import podman_compose_cmd
 
 
 @CommandArgument("restart", help="Restart services")

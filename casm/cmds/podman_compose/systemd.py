@@ -8,8 +8,8 @@ from xkits_command import CommandArgument
 from xkits_command import CommandExecutor
 
 from casm.cmds.podman_compose.service import add_pos_services
-from casm.utils import assemble_file
-from casm.utils import podman_container
+from casm.utils.assemble import assemble_file
+from casm.utils.podman import podman_container
 
 
 @CommandArgument("enable", help="Enable systemd unit for containers")

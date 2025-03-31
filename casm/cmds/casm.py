@@ -28,7 +28,7 @@ from casm.cmds.podman_compose.stop import add_cmd_stop
 from casm.cmds.podman_compose.systemd import add_cmd_systemd
 from casm.cmds.podman_compose.unpause import add_cmd_unpause
 from casm.cmds.podman_compose.up import add_cmd_up
-from casm.utils import assemble_file
+from casm.utils.assemble import assemble_file
 
 DEF_INSTANCE = assemble_file.DEF_CONFIG_FILE
 
