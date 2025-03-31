@@ -16,7 +16,7 @@ from casm.cmds import main as casm
 from casm.cmds.modify import template
 from casm.cmds.podman import container
 from casm.cmds.podman import guard
-from casm.cmds.podman import main as cman
+from casm.cmds.podman.cman import main as cman
 from casm.utils.podman import podman_container
 
 

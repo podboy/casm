@@ -11,9 +11,9 @@ from xkits_command import CommandArgument
 from xkits_command import CommandExecutor
 
 from casm.cmds.modify import add_cmd_modify
-from casm.cmds.podman import add_cmd_guard
-from casm.cmds.podman import add_cmd_system
-from casm.cmds.podman import add_cmd_systemd
+from casm.cmds.podman.guard import add_cmd_guard
+from casm.cmds.podman.system import add_cmd_system
+from casm.cmds.podman.systemd import add_cmd_systemd
 from casm.cmds.podman_compose.down import add_cmd_down
 from casm.cmds.podman_compose.exec import add_cmd_exec
 from casm.cmds.podman_compose.logs import add_cmd_logs
