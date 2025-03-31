@@ -17,7 +17,6 @@ from casm.cmds.modify import add_cmd_modify
 from casm.cmds.podman.system import add_cmd_system
 from casm.cmds.podman_compose.down import add_cmd_down
 from casm.cmds.podman_compose.exec import add_cmd_exec
-from casm.cmds.podman_compose.guard import add_cmd_guard
 from casm.cmds.podman_compose.logs import add_cmd_logs
 from casm.cmds.podman_compose.pause import add_cmd_pause
 from casm.cmds.podman_compose.pull import add_cmd_pull
@@ -49,7 +48,7 @@ def add_cmd(_arg: ArgParser):
 @CommandExecutor(add_cmd, add_cmd_pull, add_cmd_up, add_cmd_down,
                  add_cmd_start, add_cmd_stop, add_cmd_restart,
                  add_cmd_pause, add_cmd_unpause, add_cmd_exec, add_cmd_logs,
-                 add_cmd_system, add_cmd_systemd, add_cmd_guard,
+                 add_cmd_system, add_cmd_systemd,
                  add_cmd_services, add_cmd_modify)
 def run_cmd(cmds: Command) -> int:
     instance: str = DEF_INSTANCE

@@ -16,7 +16,6 @@ from casm.cmds.casm import main as casm
 from casm.cmds.cman import main as cman
 from casm.cmds.modify import template
 from casm.cmds.podman import container
-from casm.cmds.podman_compose import guard
 from casm.utils.podman import podman_container
 
 
@@ -225,20 +224,6 @@ class Test_casm(unittest.TestCase):
         self.assertEqual(casm(cmds), 0)
         self.assertEqual(casm(cmds + ["--service-name"]), 0)
         self.assertEqual(casm(cmds + ["--container-name"]), 0)
-
-    def test_guard(self):
-        cmds: List[str] = ["--template", self.template, "guard"]
-        self.assertEqual(casm(cmds), 0)
-
-    @mock.patch.object(guard.podman_container, "generate_guard_task", mock.MagicMock())  # noqa:E501
-    def test_guard_generate(self):
-        cmds: List[str] = ["--template", self.template, "guard", "generate", "worker"]  # noqa:E501
-        self.assertEqual(casm(cmds), 0)
-
-    @mock.patch.object(guard.podman_container, "destroy_guard_task", mock.MagicMock())  # noqa:E501
-    def test_guard_destroy(self):
-        cmds: List[str] = ["--template", self.template, "guard", "destroy", "worker"]  # noqa:E501
-        self.assertEqual(casm(cmds), 0)
 
 
 class Test_cman(unittest.TestCase):

@@ -1,9 +1,7 @@
 # coding:utf-8
 
-import getpass
-from grp import getgrnam
+from errno import EEXIST
 import os
-from pwd import getpwnam
 from random import randint
 import shutil
 from threading import Thread
@@ -177,10 +175,6 @@ class podman_container:
         return f"container-{self.container_name}.service"
 
     @property
-    def guard_crontab_file(self) -> str:
-        return f"/etc/cron.d/guard-container-{self.container_name}.sh"
-
-    @property
     def healthy(self) -> bool:
         inspect = self.inspect()
 
@@ -290,21 +284,6 @@ WantedBy=default.target
         systemd_service.delete_unit(unit=self.service_unit)
         return 0
 
-    def generate_guard_task(self, interval: int = 3) -> int:
-        with open(self.guard_crontab_file, "w") as hdl:
-            username: str = getpass.getuser()
-            hdl.write(f"PATH={os.environ['PATH']}\n")
-            hdl.write(f"*/{interval} * * * * {username} cman container guard {self.container_name}\n")  # noqa:E501
-        os.chown(self.guard_crontab_file, getpwnam("root").pw_uid, getgrnam("root").gr_gid)  # noqa:E501
-        os.chmod(self.guard_crontab_file, 0o644)
-        return 0
-
-    def destroy_guard_task(self) -> int:
-        crontab_file: str = self.guard_crontab_file
-        if os.path.isfile(crontab_file):
-            os.remove(crontab_file)
-        return 0
-
     def guard(self) -> int:
         def __restart() -> int:
             Logger.stderr_red(f"container {self.container_name} restarting")
@@ -333,6 +312,53 @@ WantedBy=default.target
         containers: List[Container] = client.containers.list(all=all)
         container_names = [container.name for container in containers]
         return tuple(name for name in container_names if isinstance(name, str))
+
+
+class podman_containers_guard_service:
+    """Manage podman containers guard service"""
+    SERVICE_UNIT: str = "containers-guard.service"
+
+    @classmethod
+    def generate(cls, restart_policy: str = "always") -> systemd_service:
+        """generate systemd unit for containers guard"""
+        cmd_python = shutil.which("python")
+        cmd_cman = shutil.which("cman")
+        if not isinstance(cmd_python, str) or not isinstance(cmd_cman, str):
+            raise FileNotFoundError("python or cman command not found")
+
+        content: str = f"""
+[Unit]
+Description=Podman containers guard service
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+ExecStart={cmd_python} {cmd_cman} container guard --daemon --debug --stdout
+Restart={restart_policy}
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target
+"""
+        return systemd_service.from_string(content)
+
+    @classmethod
+    def enable(cls, restart_policy: str = "always") -> int:
+        service = cls.generate(restart_policy=restart_policy)
+        unit: str = service.create_unit(unit=cls.SERVICE_UNIT)
+        Logger.stdout_green(f"create containers guard service unit: {unit}")
+        return os.system(f"systemctl enable --now {cls.SERVICE_UNIT}")
+
+    @classmethod
+    def disable(cls) -> int:
+        errno = os.system(f"systemctl stop {cls.SERVICE_UNIT}")
+        if errno != 0:
+            return errno
+        errno = os.system(f"systemctl disable {cls.SERVICE_UNIT}")
+        if errno != 0:
+            return errno
+        return 0 if systemd_service.delete_unit(unit=cls.SERVICE_UNIT) else EEXIST  # noqa:E501
 
 
 class podman_cmd:
