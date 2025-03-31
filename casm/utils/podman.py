@@ -147,28 +147,16 @@ class podman_container:
 
     def __init__(self, container_name: str):
         assert isinstance(container_name, str)
-        self.__client: Optional[PodmanClient] = None
-        self.__container: Optional[Container] = None
         self.__container_name: str = container_name
-
-    @property
-    def client(self) -> PodmanClient:
-        if self.__client is None:
-            self.__client = PodmanClient(base_url=self.BASEURL)
-        return self.__client
-
-    @property
-    def container(self) -> Container:
-        if self.__container is None:
-            self.__container = self.client.containers.get(self.container_name)
-        return self.__container
 
     @property
     def container_name(self) -> str:
         return self.__container_name
 
     def inspect(self) -> podman_container_inspect:
-        return podman_container_inspect(self.container)
+        with PodmanClient(base_url=self.BASEURL) as client:
+            container: Container = client.containers.get(self.container_name)
+            return podman_container_inspect(container)
 
     @property
     def service_unit(self) -> str:
@@ -190,10 +178,8 @@ class podman_container:
             health = inspect.State.Health
             return health is None or health.Status == "healthy"
 
-        with PodmanClient(base_url=self.BASEURL) as client:
-            container: Container = client.containers.get(self.container_name)
-            inspect: podman_container_inspect = podman_container_inspect(container)  # noqa:E501
-            return _restarting(inspect) or _running(inspect) and _healthy(inspect)  # noqa:E501
+        inspect: podman_container_inspect = self.inspect()
+        return _restarting(inspect) or _running(inspect) and _healthy(inspect)
 
     def stop(self) -> int:
         return os.system(f"podman container stop {self.container_name}")
@@ -305,10 +291,10 @@ WantedBy=default.target
 
     @classmethod
     def list(cls, all: bool = False) -> Tuple[str, ...]:
-        client: PodmanClient = PodmanClient(base_url=cls.BASEURL)
-        containers: List[Container] = client.containers.list(all=all)
-        container_names = [container.name for container in containers]
-        return tuple(name for name in container_names if isinstance(name, str))
+        with PodmanClient(base_url=cls.BASEURL) as client:
+            containers: List[Container] = client.containers.list(all=all)
+            container_names = [container.name for container in containers]
+            return tuple(name for name in container_names if isinstance(name, str))  # noqa:E501
 
 
 class podman_containers_guard_service:
