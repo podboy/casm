@@ -329,7 +329,7 @@ WantedBy=default.target
     @classmethod
     def enable(cls, restart_policy: str = "always") -> int:
         service = cls.generate(restart_policy=restart_policy)
-        unit: str = service.create_unit(unit=cls.SERVICE_UNIT)
+        unit: str = service.create_unit(unit=cls.SERVICE_UNIT, allow_update=True)  # noqa:E501
         Logger.stdout_green(f"create containers guard service unit: {unit}")
         return os.system(f"systemctl enable --now {cls.SERVICE_UNIT}")
 
