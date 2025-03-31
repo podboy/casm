@@ -13,10 +13,10 @@ import unittest
 from unittest import mock
 
 from casm.cmds.casm import main as casm
+from casm.cmds.cman import main as cman
 from casm.cmds.modify import template
 from casm.cmds.podman import container
 from casm.cmds.podman import guard
-from casm.cmds.podman.cman import main as cman
 from casm.utils.podman import podman_container
 
 

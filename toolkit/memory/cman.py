@@ -17,7 +17,7 @@ def main():
     process: Process = Process(pid)
     print("Before import:")
     memory_info(process)
-    from casm.cmds.podman.cman import main  # noqa:F401
+    from casm.cmds.cman import main  # noqa:F401
     print("After import:")
     memory_info(process)
     print("Goodbye!")
