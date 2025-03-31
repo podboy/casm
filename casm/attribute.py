@@ -1,7 +1,7 @@
 # coding:utf-8
 
 __project__ = "casm"
-__version__ = "0.7.0"
+__version__ = "0.8"
 __urlhome__ = "https://github.com/podboy/casm/"
 __description__ = "container assembler"
 
