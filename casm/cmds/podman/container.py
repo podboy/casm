@@ -1,6 +1,6 @@
 # coding:utf-8
 
-from errno import ESRCH
+from errno import ENOTRECOVERABLE
 from threading import Thread
 from typing import Iterable
 from typing import List
@@ -55,9 +55,12 @@ def run_cmd_container_guard(cmds: Command) -> int:
             assert isinstance(thread, Thread), f"failed to create container {container.container_name } daemon thread"  # noqa:E501
             threads.add(thread)
 
-        for thread in threads:
-            thread.join()
-        return ESRCH
+        if len(threads) > 0:
+            for thread in threads:
+                thread.join()
+            return ENOTRECOVERABLE
+
+        cmds.logger.warning("no container daemon thread created, exit")
     else:
         for container in containers:
             if (exit_code := guard_container(container)) != 0:
