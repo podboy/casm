@@ -302,7 +302,7 @@ class podman_containers_guard_service:
     SERVICE_UNIT: str = "containers-guard.service"
 
     @classmethod
-    def generate(cls, restart_policy: str = "always") -> systemd_service:
+    def generate(cls, restart_policy: str = "on-failure") -> systemd_service:
         """generate systemd unit for containers guard"""
         cmd_python = shutil.which("python")
         cmd_cman = shutil.which("cman")
@@ -327,7 +327,7 @@ WantedBy=default.target
         return systemd_service.from_string(content)
 
     @classmethod
-    def enable(cls, restart_policy: str = "always") -> int:
+    def enable(cls, restart_policy: str = "on-failure") -> int:
         service = cls.generate(restart_policy=restart_policy)
         unit: str = service.create_unit(unit=cls.SERVICE_UNIT, allow_update=True)  # noqa:E501
         Logger.stdout_green(f"create containers guard service unit: {unit}")
