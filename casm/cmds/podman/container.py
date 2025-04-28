@@ -60,7 +60,7 @@ def run_cmd_container_guard(cmds: Command) -> int:
                 thread.join()
             return ENOTRECOVERABLE
 
-        cmds.logger.warning("no container daemon thread created, exit")
+        cmds.logger.warning("no container daemon thread created, exit")  # noqa:E501, pragma: no cover
     else:
         for container in containers:
             if (exit_code := guard_container(container)) != 0:

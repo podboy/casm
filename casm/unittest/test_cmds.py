@@ -2,7 +2,7 @@
 # coding:utf-8
 
 from errno import ENOENT
-from errno import ESRCH
+from errno import ENOTRECOVERABLE
 import os
 import shutil
 import sys
@@ -16,6 +16,7 @@ from casm.cmds.casm import main as casm
 from casm.cmds.cman import main as cman
 from casm.cmds.modify import template
 from casm.cmds.podman import container
+from casm.cmds.podman import guard
 from casm.utils.podman import podman_container
 
 
@@ -270,7 +271,23 @@ class Test_cman(unittest.TestCase):
         mock_daemon.side_effect = [fake_daemon]
         mock_list.return_value = ["unit", "test"]
         cmds: List[str] = ["container", "guard", "--daemon", "test"]
-        self.assertEqual(cman(cmds), ESRCH)
+        self.assertEqual(cman(cmds), ENOTRECOVERABLE)
+
+    @mock.patch.object(guard.podman_containers_guard_service, "enable")
+    def test_guard_enable(self, mock_enable):
+        mock_enable.side_effect = [123456]
+        cmds: List[str] = ["guard", "enable"]
+        self.assertEqual(cman(cmds), 123456)
+
+    @mock.patch.object(guard.podman_containers_guard_service, "disable")
+    def test_guard_disable(self, mock_disable):
+        mock_disable.side_effect = [123456]
+        cmds: List[str] = ["guard", "disable"]
+        self.assertEqual(cman(cmds), 123456)
+
+    def test_guard(self):
+        cmds: List[str] = ["guard"]
+        self.assertEqual(cman(cmds), 0)
 
     @mock.patch.object(os, "system")
     def test_system_prune(self, mock_system: mock.Mock):
