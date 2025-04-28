@@ -1,4 +1,4 @@
-name: PyPI
+name: release
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  release:
+  pypi:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
