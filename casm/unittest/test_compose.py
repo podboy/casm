@@ -12,7 +12,9 @@ from casm.utils.compose import compose_service
 from casm.utils.compose import compose_services
 from casm.utils.compose import compose_volume
 from casm.utils.compose import compose_volumes
+from casm.utils.compose import default_project_name
 from casm.utils.compose import service_deploy
+from casm.utils.compose import service_volume
 from casm.utils.compose import service_volumes
 from casm.utils.yaml import safe_load_data
 
@@ -25,22 +27,25 @@ class Test_compose_file(unittest.TestCase):
         cls.path = os.path.abspath(cls.file)
         cls.base = os.path.basename(cls.path)
         cls.yaml = safe_load_data(cls.path)
-        cls.compose_file = compose_file(
-            basedir=cls.base, project_name="unittest", compose_yaml=cls.yaml)
 
     @classmethod
     def tearDownClass(cls):
         pass
 
     def setUp(self):
-        pass
+        self.compose_file = compose_file(base_dir=self.base,
+                                         project_name="unittest",
+                                         compose_yaml=self.yaml)
 
     def tearDown(self):
         pass
 
+    def test_default_project_name(self):
+        self.assertEqual(default_project_name(os.path.dirname(__file__)), "unittest")  # noqa:E501
+
     def test_check_compose_file(self):
-        self.assertIsInstance(self.compose_file.basedir, str)
-        self.assertEqual(self.compose_file.basedir, self.base)
+        self.assertIsInstance(self.compose_file.base_dir, str)
+        self.assertEqual(self.compose_file.base_dir, self.base)
         self.assertIsInstance(self.compose_file.volumes, compose_volumes)
         self.assertIsInstance(self.compose_file.volumes.root, compose_file)
         self.assertIsInstance(self.compose_file.volumes.content, Dict)
@@ -110,6 +115,18 @@ class Test_compose_file(unittest.TestCase):
             self.assertIsInstance(service.restart, str)
             self.assertIsInstance(service.volumes, service_volumes)
             self.assertIsInstance(service.deploy, service_deploy)
+            self.assertIsInstance(service.deploy.service, compose_service)
+            self.assertIsNone(service.volumes.update())
+            service.mount("/test", "/unit", False)
+            service.mount("/test", "/demo", False)
+            service.mount("/test", "/demo", True)
+            for volume in service.volumes:
+                self.assertIsInstance(volume, service_volume)
+                self.assertTrue(isinstance(volume.volume_name, str) or volume.volume_name is None)  # noqa:E501
+                self.assertIsInstance(volume.read_only, bool)
+                self.assertIsInstance(volume.target, str)
+                volume.value = "test:/demo:ro"
+            service.volumes = service.volumes
 
     def test_check_compose_service_set_get_del(self):
         self.compose_file.services["unittest"] = compose_service(
@@ -126,6 +143,7 @@ class Test_compose_file(unittest.TestCase):
         self.assertIsInstance(service.restart, str)
         self.assertIsInstance(service.volumes, service_volumes)
         self.assertIsInstance(service.deploy, service_deploy)
+        self.assertIsInstance(service.deploy.service, compose_service)
         del self.compose_file.services["unittest"]
 
 

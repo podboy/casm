@@ -11,15 +11,11 @@ class podman_compose_cmd:
     def __init__(self, compose_file: Optional[str]):
         if isinstance(compose_file, str):
             assert os.path.isfile(compose_file)
-        else:
-            assert compose_file is None
         self.__compose_file: Optional[str] = compose_file
 
     @property
     def opt_file(self) -> Optional[str]:
-        if self.__compose_file is None:
-            return None
-        return f"--file {self.__compose_file}"
+        return f"--file {self.__compose_file}" if self.__compose_file else None
 
     def run(self, *args: str) -> int:
         def exec(*cmds: Optional[str]) -> int:

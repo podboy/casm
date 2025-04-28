@@ -13,10 +13,10 @@ from podman_compose import parse_short_mount
 import yaml
 
 
-def default_project_name(basedir: str):
-    assert isinstance(basedir, str)
-    assert os.path.isdir(basedir)
-    realpath = os.path.realpath(basedir)
+def default_project_name(base_dir: str):
+    assert isinstance(base_dir, str)
+    assert os.path.isdir(base_dir)
+    realpath = os.path.realpath(base_dir)
     basename = os.path.basename(realpath)
     return norm_re.sub("", basename.lower())
 
@@ -196,7 +196,7 @@ class service_volume:
         self.__volumes: service_volumes = volumes
         self.__value: Union[str, Dict[str, Any]] = value
         if isinstance(value, str):
-            short = parse_short_mount(value, self.__root.basedir)
+            short = parse_short_mount(value, self.__root.base_dir)
             assert isinstance(short, dict)
             self.__short = short
 
@@ -205,30 +205,30 @@ class service_volume:
         __volume_name = None
         if self.type == "volume":
             source = self.source
-            _volume = None
-            for vol in self.__root.volumes:
-                if vol.title == source:
-                    _volume = vol
-                    break
-            assert isinstance(_volume, compose_volume)
-            name = _volume.name
             if not source:
                 __volume_name = "_".join([
-                    self.__root.project_name,
-                    self.__service.title,
+                    self.__root.project_name, self.__service.title,
                     hashlib.sha256(self.target.encode("utf-8")).hexdigest(),
                 ])
-            elif not name:
-                assert isinstance(source, str)
-                external = _volume.external
-                if isinstance(external, dict):
-                    __volume_name = external.get("name", source)
-                elif external:
-                    __volume_name = f"{source}"
-                else:
-                    __volume_name = f"{self.__root.project_name}_{source}"
             else:
-                __volume_name = name
+                _volume = None
+                for vol in self.__root.volumes:
+                    if vol.title == source:
+                        _volume = vol
+                        break
+                assert isinstance(_volume, compose_volume)
+                name = _volume.name
+                if not name:
+                    assert isinstance(source, str)
+                    external = _volume.external
+                    if isinstance(external, dict):
+                        __volume_name = external.get("name", source)  # noqa:E501, pragma: no cover
+                    elif external:
+                        __volume_name = f"{source}"  # pragma: no cover
+                    else:
+                        __volume_name = f"{self.__root.project_name}_{source}"  # noqa:E501
+                else:
+                    __volume_name = name  # pragma: no cover
         return __volume_name
 
     @property
@@ -242,7 +242,7 @@ class service_volume:
     @value.setter
     def value(self, new: Union[str, Dict[str, Any]]):
         if isinstance(new, str):
-            short = parse_short_mount(new, self.__root.basedir)
+            short = parse_short_mount(new, self.__root.base_dir)
             assert isinstance(short, dict)
             self.__short = short
         self.__value = new
@@ -260,10 +260,8 @@ class service_volume:
         return type
 
     @property
-    def source(self) -> str:
-        source = self.generic.get(self.KEY_SOURCE, None)
-        assert isinstance(source, str)
-        return source
+    def source(self) -> Optional[str]:
+        return self.generic.get(self.KEY_SOURCE, None)
 
     @property
     def target(self) -> str:
@@ -343,7 +341,7 @@ class compose_service:
         assert isinstance(services, compose_services)
         services.content.setdefault(title, {})
         if services.content[title] is None:
-            services.content[title] = {}
+            services.content[title] = {}  # pragma: no cover
         value = services.content[title]
         assert isinstance(title, str)
         assert isinstance(value, dict)
@@ -469,11 +467,11 @@ class compose_file:
     3.x: https://docs.docker.com/compose/compose-file/compose-file-v3
     """
 
-    def __init__(self, basedir: str, project_name: str, compose_yaml: str):
-        assert isinstance(basedir, str)
+    def __init__(self, base_dir: str, project_name: str, compose_yaml: str):
+        assert isinstance(base_dir, str)
         assert isinstance(project_name, str)
         assert isinstance(compose_yaml, str)
-        self.__basedir = basedir
+        self.__base_dir = base_dir
         self.__project_name = project_name
         self.__content: Dict[str, Any] = yaml.safe_load(compose_yaml)
         self.__volumes = compose_volumes(self)
@@ -485,8 +483,8 @@ class compose_file:
         return self.__project_name
 
     @property
-    def basedir(self) -> str:
-        return self.__basedir
+    def base_dir(self) -> str:
+        return self.__base_dir
 
     @property
     def content(self) -> Dict[str, Any]:

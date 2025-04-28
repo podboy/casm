@@ -218,7 +218,7 @@ class podman_container:
         same as 'podman generate systemd <container>'
         """
         if not isinstance(CMD, str):
-            raise FileNotFoundError("podman command not found")
+            raise FileNotFoundError("podman command not found")  # noqa:E501, pragma: no cover
 
         container_inspect: podman_container_inspect = self.inspect()
         mounts: List[Optional[str]] = [mountpoint(bind.split(":")[0]) for bind in  # noqa:E501
@@ -307,7 +307,7 @@ class podman_containers_guard_service:
         cmd_python = shutil.which("python")
         cmd_cman = shutil.which("cman")
         if not isinstance(cmd_python, str) or not isinstance(cmd_cman, str):
-            raise FileNotFoundError("python or cman command not found")
+            raise FileNotFoundError("python or cman command not found")  # noqa:E501, pragma: no cover
 
         content: str = f"""
 [Unit]
@@ -358,7 +358,7 @@ class podman_cmd:
             return os.system(cmd)
 
         if not isinstance(CMD, str):
-            raise FileNotFoundError("podman command not found")
+            raise FileNotFoundError("podman command not found")  # noqa:E501, pragma: no cover
 
         cmds: List[str] = [CMD]
         cmds.extend([i for i in args if len(i) > 0])

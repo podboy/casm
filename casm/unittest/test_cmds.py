@@ -243,7 +243,9 @@ class Test_cman(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def test_container(self):
+    @mock.patch.object(container.podman_container, "list")
+    def test_container(self, mock_list):
+        mock_list.return_value = ["unit", "test"]
         cmds: List[str] = ["container"]
         self.assertEqual(cman(cmds), 0)
 
@@ -273,24 +275,32 @@ class Test_cman(unittest.TestCase):
         cmds: List[str] = ["container", "guard", "--daemon", "test"]
         self.assertEqual(cman(cmds), ENOTRECOVERABLE)
 
+    @mock.patch.object(container.podman_container, "list")
     @mock.patch.object(guard.podman_containers_guard_service, "enable")
-    def test_guard_enable(self, mock_enable):
+    def test_guard_enable(self, mock_enable, mock_list):
+        mock_list.return_value = ["unit", "test"]
         mock_enable.side_effect = [123456]
         cmds: List[str] = ["guard", "enable"]
         self.assertEqual(cman(cmds), 123456)
 
+    @mock.patch.object(container.podman_container, "list")
     @mock.patch.object(guard.podman_containers_guard_service, "disable")
-    def test_guard_disable(self, mock_disable):
+    def test_guard_disable(self, mock_disable, mock_list):
+        mock_list.return_value = ["unit", "test"]
         mock_disable.side_effect = [123456]
         cmds: List[str] = ["guard", "disable"]
         self.assertEqual(cman(cmds), 123456)
 
-    def test_guard(self):
+    @mock.patch.object(container.podman_container, "list")
+    def test_guard(self, mock_list):
+        mock_list.return_value = ["unit", "test"]
         cmds: List[str] = ["guard"]
         self.assertEqual(cman(cmds), 0)
 
     @mock.patch.object(os, "system")
-    def test_system_prune(self, mock_system: mock.Mock):
+    @mock.patch.object(container.podman_container, "list")
+    def test_system_prune(self, mock_list, mock_system: mock.Mock):
+        mock_list.return_value = ["unit", "test"]
         mock_system.side_effect = [0]
         cmds: List[str] = ["system", "prune"]
         self.assertEqual(cman(cmds), 0)
