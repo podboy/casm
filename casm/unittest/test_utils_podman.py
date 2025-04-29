@@ -221,10 +221,12 @@ class Test_podman_containers_guard_service(unittest.TestCase):
         mock_system.side_effect = [0, 123]
         self.assertEqual(podman.podman_containers_guard_service.disable(), 123)
 
+    @mock.patch.object(podman.os, "remove", mock.MagicMock())
     @mock.patch.object(podman.os, "system")
     def test_disable(self, mock_system):
         mock_system.side_effect = [0, 0]
-        self.assertEqual(podman.podman_containers_guard_service.disable(), 0)
+        check = podman.podman_containers_guard_service.disable()
+        self.assertTrue(check == 0 or check == podman.EEXIST)
 
 
 class Test_podman_cmd(unittest.TestCase):

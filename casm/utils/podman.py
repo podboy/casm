@@ -143,7 +143,7 @@ class podman_container_inspect:
 
 class podman_container:
     """Manage podman container"""
-    BASEURL: str = "unix:///run/podman/podman.sock"
+    BASE_URL: str = "unix:///run/podman/podman.sock"
 
     def __init__(self, container_name: str):
         assert isinstance(container_name, str)
@@ -154,7 +154,7 @@ class podman_container:
         return self.__container_name
 
     def inspect(self) -> podman_container_inspect:
-        with PodmanClient(base_url=self.BASEURL) as client:
+        with PodmanClient(base_url=self.BASE_URL) as client:
             container: Container = client.containers.get(self.container_name)
             return podman_container_inspect(container)
 
@@ -291,7 +291,7 @@ WantedBy=default.target
 
     @classmethod
     def list(cls, all: bool = False) -> Tuple[str, ...]:
-        with PodmanClient(base_url=cls.BASEURL) as client:
+        with PodmanClient(base_url=cls.BASE_URL) as client:
             containers: List[Container] = client.containers.list(all=all)
             container_names = [container.name for container in containers]
             return tuple(name for name in container_names if isinstance(name, str))  # noqa:E501
