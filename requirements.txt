@@ -1,6 +1,6 @@
 makefile-help
 xkits-command>=0.4
 xkits-thread>=0.2
-xmanage>=0.6
+xmanage>=0.7
 podman_compose>=1.2.0
 podman>=5.2.0
