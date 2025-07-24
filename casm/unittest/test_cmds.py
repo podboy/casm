@@ -195,7 +195,7 @@ class Test_casm(unittest.TestCase):
     @mock.patch.object(podman_container, "generate_service", mock.MagicMock())
     def test_systemd_disable(self, mock_system: mock.Mock):
         template = os.path.join("example", "systemd", "template.yml")
-        mock_system.side_effect = [0, 0]
+        mock_system.side_effect = [0, 0, 0]
         cmds: List[str] = ["--template", template,
                            "--project-name", "unittest",
                            "systemd", "disable", "worker"]
@@ -204,6 +204,7 @@ class Test_casm(unittest.TestCase):
         calls = [
             mock.call(f"systemctl stop {service}"),
             mock.call(f"systemctl disable {service}"),
+            mock.call("systemctl daemon-reload"),
         ]
         mock_system.assert_has_calls(calls)
 
