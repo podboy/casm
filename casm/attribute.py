@@ -3,7 +3,7 @@
 __project__ = "casm"
 __version__ = "0.9.1"
 __urlhome__ = "https://github.com/podboy/casm/"
-__description__ = "container assembler"
+__description__ = "Container Assembler"
 
 # author
 __author__ = "Mingzhe Zou"
