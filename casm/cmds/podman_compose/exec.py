@@ -1,5 +1,7 @@
 # coding:utf-8
 
+from logging import DEBUG
+
 from xkits_command import ArgParser
 from xkits_command import Command
 from xkits_command import CommandArgument
@@ -26,6 +28,7 @@ def add_cmd_exec(_arg: ArgParser):
 
 @CommandExecutor(add_cmd_exec)
 def run_cmd_exec(cmds: Command) -> int:
+    debug_mode: bool = cmds.logger.level <= DEBUG
     assemble: assemble_file = cmds.args.assemble_file
     assert isinstance(assemble, assemble_file), f"TypeError: {type(assemble)}"
     assert isinstance(cmds.args.service, list) and len(cmds.args.service) == 1
@@ -33,7 +36,7 @@ def run_cmd_exec(cmds: Command) -> int:
     privileged: bool = cmds.args.privileged
     user = cmds.args.user[0] if isinstance(cmds.args.user, list) else None
     index = cmds.args.index[0] if isinstance(cmds.args.index, list) else None
-    pcommand: podman_compose_cmd = podman_compose_cmd(assemble.template_file)
+    pcommand: podman_compose_cmd = podman_compose_cmd(assemble.template_file, debug=debug_mode)  # noqa:E501
     return pcommand.exec(service=service, arguments=cmds.args.arguments,
                          detach=cmds.args.detach, privileged=privileged,
                          user=user, T=cmds.args.T, index=index)
