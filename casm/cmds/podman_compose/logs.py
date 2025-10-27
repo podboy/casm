@@ -25,7 +25,7 @@ def add_cmd_logs(_arg: ArgParser):
 def run_cmd_logs(cmds: Command) -> int:
     assemble: assemble_file = cmds.args.assemble_file
     assert isinstance(assemble, assemble_file), f"TypeError: {type(assemble)}"
+    pcommand: podman_compose_cmd = podman_compose_cmd(assemble.template_file)
     services: List[str] = filter_services(assemble, cmds.args.services)
     tail = cmds.args.tail[0] if isinstance(cmds.args.tail, list) else None
-    cmd = podman_compose_cmd(assemble.template_file)
-    return cmd.logs(services, follow=cmds.args.follow, tail=tail)
+    return pcommand.logs(services, follow=cmds.args.follow, tail=tail)

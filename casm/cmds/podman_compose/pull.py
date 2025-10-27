@@ -22,5 +22,6 @@ def add_cmd_pull(_arg: ArgParser):
 def run_cmd_pull(cmds: Command) -> int:
     assemble: assemble_file = cmds.args.assemble_file
     assert isinstance(assemble, assemble_file), f"TypeError: {type(assemble)}"
+    pcommand: podman_compose_cmd = podman_compose_cmd(assemble.template_file)
     services: List[str] = filter_services(assemble, cmds.args.services)
-    return podman_compose_cmd(assemble.template_file).pull(services)
+    return pcommand.pull(services)

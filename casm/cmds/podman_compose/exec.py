@@ -29,10 +29,11 @@ def run_cmd_exec(cmds: Command) -> int:
     assemble: assemble_file = cmds.args.assemble_file
     assert isinstance(assemble, assemble_file), f"TypeError: {type(assemble)}"
     assert isinstance(cmds.args.service, list) and len(cmds.args.service) == 1
-    service = cmds.args.service[0]
+    service: str = cmds.args.service[0]
+    privileged: bool = cmds.args.privileged
     user = cmds.args.user[0] if isinstance(cmds.args.user, list) else None
     index = cmds.args.index[0] if isinstance(cmds.args.index, list) else None
-    cmd = podman_compose_cmd(assemble.template_file)
-    return cmd.exec(service=service, arguments=cmds.args.arguments,
-                    detach=cmds.args.detach, privileged=cmds.args.privileged,
-                    user=user, T=cmds.args.T, index=index)
+    pcommand: podman_compose_cmd = podman_compose_cmd(assemble.template_file)
+    return pcommand.exec(service=service, arguments=cmds.args.arguments,
+                         detach=cmds.args.detach, privileged=privileged,
+                         user=user, T=cmds.args.T, index=index)
