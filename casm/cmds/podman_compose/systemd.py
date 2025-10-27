@@ -24,7 +24,7 @@ def add_cmd_enable(_arg: ArgParser):
 def run_cmd_enable(cmds: Command) -> int:
     restart_policy: str = cmds.args.restart_policy[0]
     assemble: assemble_file = cmds.args.assemble_file
-    assert isinstance(assemble, assemble_file)
+    assert isinstance(assemble, assemble_file), f"TypeError: {type(assemble)}"
     services: List[str] = cmds.args.services
     for service in assemble.template.services:
         cmds.logger.debug(f"{service.title}: {service.container_name}")
@@ -45,7 +45,7 @@ def add_cmd_disable(_arg: ArgParser):
 @CommandExecutor(add_cmd_disable)
 def run_cmd_disable(cmds: Command) -> int:
     assemble: assemble_file = cmds.args.assemble_file
-    assert isinstance(assemble, assemble_file)
+    assert isinstance(assemble, assemble_file), f"TypeError: {type(assemble)}"
     services: List[str] = cmds.args.services
     for service in assemble.template.services:
         cmds.logger.debug(f"{service.title}: {service.container_name}")

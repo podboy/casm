@@ -93,7 +93,7 @@ def add_cmd_services(_arg: ArgParser):
 @CommandExecutor(add_cmd_services)
 def run_cmd_services(cmds: Command) -> int:
     assemble: assemble_file = cmds.args.assemble_file
-    assert isinstance(assemble, assemble_file)
+    assert isinstance(assemble, assemble_file), f"TypeError: {type(assemble)}"
     for service in assemble.template.services:
         service_name: str = service.title
         container_name: str = assemble.safe_substitute(service.container_name)

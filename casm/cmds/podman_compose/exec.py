@@ -27,7 +27,7 @@ def add_cmd_exec(_arg: ArgParser):
 @CommandExecutor(add_cmd_exec)
 def run_cmd_exec(cmds: Command) -> int:
     assemble: assemble_file = cmds.args.assemble_file
-    assert isinstance(assemble, assemble_file)
+    assert isinstance(assemble, assemble_file), f"TypeError: {type(assemble)}"
     assert isinstance(cmds.args.service, list) and len(cmds.args.service) == 1
     service = cmds.args.service[0]
     user = cmds.args.user[0] if isinstance(cmds.args.user, list) else None

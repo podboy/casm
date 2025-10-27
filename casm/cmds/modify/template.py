@@ -15,7 +15,7 @@ from casm.utils.assemble import assemble_file
 
 def dump(cmds: Command) -> int:
     assemble: assemble_file = cmds.args.assemble_file
-    assert isinstance(assemble, assemble_file)
+    assert isinstance(assemble, assemble_file), f"TypeError: {type(assemble)}"
 
     output_file: str = assemble.template_file
     if isinstance(cmds.args.output, list):
@@ -39,7 +39,7 @@ def add_cmd_services(_arg: ArgParser):
 @CommandExecutor(add_cmd_services)
 def run_cmd_services(cmds: Command) -> int:
     assemble: assemble_file = cmds.args.assemble_file
-    assert isinstance(assemble, assemble_file)
+    assert isinstance(assemble, assemble_file), f"TypeError: {type(assemble)}"
     services: List[str] = filter_services(assemble, cmds.args.services)
     for service in assemble.template.services:
         if len(services) > 0 and service.title not in services:

@@ -21,6 +21,6 @@ def add_cmd_stop(_arg: ArgParser):
 @CommandExecutor(add_cmd_stop)
 def run_cmd_stop(cmds: Command) -> int:
     assemble: assemble_file = cmds.args.assemble_file
-    assert isinstance(assemble, assemble_file)
+    assert isinstance(assemble, assemble_file), f"TypeError: {type(assemble)}"
     services: List[str] = filter_services(assemble, cmds.args.services)
     return podman_compose_cmd(assemble.template_file).stop(services)
