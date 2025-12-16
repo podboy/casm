@@ -6,8 +6,13 @@ all: build reinstall test
 
 
 release: all
-	git tag -a v${VERSION} -m "release v${VERSION}"
-	git push origin --tags
+	if [ -n "${VERSION}" ]; then \
+		git tag -a v${VERSION} -m "release v${VERSION}"; \
+		git push origin --tags; \
+	fi
+
+version:
+	@echo ${VERSION}
 
 
 clean-cover:
