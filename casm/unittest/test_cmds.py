@@ -12,6 +12,8 @@ from typing import List
 import unittest
 from unittest import mock
 
+from podman.domain.containers import Container
+
 from casm.cmds.casm import main as casm
 from casm.cmds.cman import main as cman
 from casm.cmds.modify import template
@@ -232,7 +234,33 @@ class Test_cman(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        pass
+        cls.health = {
+            "Status": "healthy",
+            "FailingStreak": 0,
+        }
+        cls.state = {
+            "Status": "created",
+            "Running": False,
+            "Paused": False,
+            "Restarting": False,
+            "OOMKilled": False,
+            "Dead": False,
+            "Pid": 1,
+            "ConmonPid": 2,
+            "ExitCode": 3,
+            "Health": cls.health,
+        }
+        cls.host_config = {
+            "Binds": [],
+        }
+        cls.inspect = {
+            "Id": "123456",
+            "Name": "demo",
+            "RestartCount": 1,
+            "PidFile": "/tmp/demo.pid",
+            "State": cls.state,
+            "HostConfig": cls.host_config,
+        }
 
     @classmethod
     def tearDownClass(cls):
@@ -249,6 +277,16 @@ class Test_cman(unittest.TestCase):
         mock_list.return_value = ["unit", "test"]
         cmds: List[str] = ["container"]
         self.assertEqual(cman(cmds), 0)
+
+    @mock.patch.object(container.podman_container, "list")
+    @mock.patch.object(container.podman_container, "inspect")
+    def test_container_inspect(self, mock_inspect, mock_list):  # noqa:E501
+        with mock.patch.object(_container := Container(), "inspect") as mock_client_inspect:  # noqa:E501
+            mock_client_inspect.side_effect = [self.inspect]
+            mock_inspect.return_value = container.podman_container_inspect(_container)  # noqa:E501
+            mock_list.return_value = ["unit", "test"]
+            cmds: List[str] = ["container", "inspect"]
+            self.assertEqual(cman(cmds), 0)
 
     @mock.patch.object(container.podman_container, "list")
     @mock.patch.object(container.podman_container, "guard")

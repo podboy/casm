@@ -13,6 +13,7 @@ from xkits_command import CommandArgument
 from xkits_command import CommandExecutor
 
 from casm.utils.podman import podman_container
+from casm.utils.podman import podman_container_inspect
 
 
 def add_pos_containers(_arg: ArgParser):
@@ -70,11 +71,38 @@ def run_cmd_container_guard(cmds: Command) -> int:
     return 0
 
 
+@CommandArgument("inspect", help="Displays the low-level information")
+def add_cmd_container_inspect(_arg: ArgParser):
+    add_pos_containers(_arg)
+
+
+@CommandExecutor(add_cmd_container_inspect)
+def run_cmd_container_inspect(cmds: Command) -> int:
+    container_names: Iterable[str] = cmds.args.containers or podman_container.list(all=True)  # noqa:E501
+    containers: List[podman_container] = [podman_container(name) for name in container_names]  # noqa:E501
+    for container in containers:
+        inspect: podman_container_inspect = container.inspect()
+        cmds.stdout(f"container {container.container_name} inspect:")
+        cmds.stdout(f"State.Status: {inspect.State.Status}")
+        cmds.stdout(f"State.Running: {inspect.State.Running}")
+        cmds.stdout(f"State.Restarting: {inspect.State.Restarting}")
+        cmds.stdout(f"State.OOMKilled: {inspect.State.OOMKilled}")
+        cmds.stdout(f"State.Paused: {inspect.State.Paused}")
+        cmds.stdout(f"State.Dead: {inspect.State.Dead}")
+
+        if inspect.State.Health is not None:
+            cmds.stdout(f"State.Health.Status: {inspect.State.Health.Status}")
+
+        available: str = "available" if inspect.is_available else "unavailable"
+        cmds.stdout_red(f"container {container.container_name} is {available}")
+    return 0
+
+
 @CommandArgument("container", help="Manage podman containers")
 def add_cmd_container(_arg: ArgParser):
     pass
 
 
-@CommandExecutor(add_cmd_container, add_cmd_container_guard)
+@CommandExecutor(add_cmd_container, add_cmd_container_guard, add_cmd_container_inspect)  # noqa:E501
 def run_cmd_container(cmds: Command) -> int:
     return 0
