@@ -1,13 +1,14 @@
 #!/usr/bin/python3
 # coding:utf-8
 
-import unittest
+from unittest import TestCase
+from unittest import main
 from unittest import mock
 
 from casm.utils import common
 
 
-class Test_utils_common(unittest.TestCase):
+class Test_utils_common(TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -41,4 +42,4 @@ class Test_utils_common(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    main()

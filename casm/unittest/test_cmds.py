@@ -9,7 +9,8 @@ import sys
 from threading import Thread
 from time import time
 from typing import List
-import unittest
+from unittest import TestCase
+from unittest import main
 from unittest import mock
 
 from podman.domain.containers import Container
@@ -22,7 +23,7 @@ from casm.cmds.podman import guard
 from casm.utils.podman import podman_container
 
 
-class Test_casm(unittest.TestCase):
+class Test_casm(TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -230,7 +231,7 @@ class Test_casm(unittest.TestCase):
         self.assertEqual(casm(cmds + ["--container-name"]), 0)
 
 
-class Test_cman(unittest.TestCase):
+class Test_cman(TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -348,4 +349,4 @@ class Test_cman(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    main()

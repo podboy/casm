@@ -2,13 +2,14 @@
 # coding:utf-8
 
 import os
-import unittest
+from unittest import TestCase
+from unittest import main
 from unittest import mock
 
 from casm.utils import assemble
 
 
-class Test_assemble_variables(unittest.TestCase):
+class Test_assemble_variables(TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -33,7 +34,7 @@ class Test_assemble_variables(unittest.TestCase):
         del self.variables["demo"]
 
 
-class Test_assemble_file(unittest.TestCase):
+class Test_assemble_file(TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -60,4 +61,4 @@ class Test_assemble_file(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    main()

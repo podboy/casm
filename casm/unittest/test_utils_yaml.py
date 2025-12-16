@@ -3,12 +3,13 @@
 
 from os.path import join
 from tempfile import TemporaryDirectory
-import unittest
+from unittest import TestCase
+from unittest import main
 
 from casm.utils import yaml
 
 
-class Test_utils_yaml(unittest.TestCase):
+class Test_utils_yaml(TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -34,4 +35,4 @@ class Test_utils_yaml(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    main()

@@ -1,13 +1,14 @@
 #!/usr/bin/python3
 # coding:utf-8
 
-import unittest
+from unittest import TestCase
+from unittest import main
 from unittest import mock
 
 from casm.utils import podman
 
 
-class Test_podman_container_inspect(unittest.TestCase):
+class Test_podman_container_inspect(TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -78,7 +79,7 @@ class Test_podman_container_inspect(unittest.TestCase):
         self.assertFalse(self.container_inspect.is_active)
 
 
-class Test_podman_container(unittest.TestCase):
+class Test_podman_container(TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -188,7 +189,7 @@ class Test_podman_container(unittest.TestCase):
         self.assertEqual(podman.podman_container.list(), ())
 
 
-class Test_podman_containers_guard_service(unittest.TestCase):
+class Test_podman_containers_guard_service(TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -231,7 +232,7 @@ class Test_podman_containers_guard_service(unittest.TestCase):
         self.assertTrue(check == 0 or check == podman.EEXIST)
 
 
-class Test_podman_cmd(unittest.TestCase):
+class Test_podman_cmd(TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -254,4 +255,4 @@ class Test_podman_cmd(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    main()

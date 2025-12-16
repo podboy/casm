@@ -3,7 +3,8 @@
 
 import os
 from typing import Dict
-import unittest
+from unittest import TestCase
+from unittest import main
 
 from casm.utils.compose import compose_file
 from casm.utils.compose import compose_network
@@ -19,7 +20,7 @@ from casm.utils.compose import service_volumes
 from casm.utils.yaml import safe_load_data
 
 
-class Test_compose_file(unittest.TestCase):
+class Test_compose_file(TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -148,4 +149,4 @@ class Test_compose_file(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    main()
