@@ -66,6 +66,10 @@ class podman_container_inspect:
 
         @property
         def OOMKilled(self) -> bool:
+            """The OOMKilled flag is a historical status indicator.
+
+            It is permanently recorded until end-of-life and never changes.
+            """
             return self.__value["OOMKilled"]
 
         @property
@@ -87,6 +91,14 @@ class podman_container_inspect:
         @property
         def Health(self) -> Optional[health_struct]:
             return self.__health
+
+        @property
+        def is_available_status(self) -> bool:
+            return self.Status == "running" and self.Running and not self.Paused and not self.Dead  # noqa:E501
+
+        @property
+        def is_acceptable_health(self) -> bool:
+            return self.Health is None or self.Health.Status == "healthy"
 
     class host_config_struct:
         def __init__(self, value: Dict[str, Any]):
@@ -140,6 +152,14 @@ class podman_container_inspect:
             self.__host_config = self.host_config_struct(self.info["HostConfig"])  # noqa:E501
         return self.__host_config
 
+    @property
+    def is_available(self) -> bool:
+        return self.State.is_available_status and self.State.is_acceptable_health  # noqa:E501
+
+    @property
+    def is_active(self) -> bool:
+        return self.State.Restarting or self.is_available
+
 
 class podman_container:
     """Manage podman container"""
@@ -163,23 +183,16 @@ class podman_container:
         return f"container-{self.container_name}.service"
 
     @property
-    def healthy(self) -> bool:
-        def _restarting(inspect: podman_container_inspect) -> bool:
-            return inspect.State.Restarting
+    def available(self) -> bool:
+        return self.inspect().is_available
 
-        def _running(inspect: podman_container_inspect) -> bool:
-            return inspect.State.Status == "running" and\
-                inspect.State.Running and\
-                not inspect.State.Paused and\
-                not inspect.State.OOMKilled and\
-                not inspect.State.Dead
+    @property
+    def active(self) -> bool:
+        return self.inspect().is_active
 
-        def _healthy(inspect: podman_container_inspect) -> bool:
-            health = inspect.State.Health
-            return health is None or health.Status == "healthy"
-
-        inspect: podman_container_inspect = self.inspect()
-        return _restarting(inspect) or _running(inspect) and _healthy(inspect)
+    @property
+    def alive(self) -> bool:
+        return self.inspect().is_active
 
     def stop(self) -> int:
         return os.system(f"podman container stop {self.container_name}")
@@ -271,7 +284,7 @@ WantedBy=default.target
         def __restart() -> int:
             Logger.stderr_red(f"container {self.container_name} restarting")
             return self.restart() if self.restart_service() != 0 else 0
-        return __restart() if not self.healthy else 0
+        return __restart() if not self.active else 0
 
     def daemon(self, block: bool = True, min_delay: int = 180, max_delay: int = 3600) -> Optional[Thread]:  # noqa:E501
         max_delay = max(min_delay + 120, max_delay)

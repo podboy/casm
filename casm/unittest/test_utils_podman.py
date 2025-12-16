@@ -71,7 +71,11 @@ class Test_podman_container_inspect(unittest.TestCase):
         assert isinstance(self.container_inspect.State.Health, podman.podman_container_inspect.state_struct.health_struct)  # noqa:E501
         self.assertEqual(self.container_inspect.State.Health.Status, "healthy")
         self.assertEqual(self.container_inspect.State.Health.FailingStreak, 0)
+        self.assertFalse(self.container_inspect.State.is_available_status)
+        self.assertTrue(self.container_inspect.State.is_acceptable_health)
         self.assertEqual(self.container_inspect.HostConfig.Binds, [])
+        self.assertFalse(self.container_inspect.is_available)
+        self.assertFalse(self.container_inspect.is_active)
 
 
 class Test_podman_container(unittest.TestCase):
@@ -156,15 +160,13 @@ class Test_podman_container(unittest.TestCase):
         mock_system.side_effect = [123, 456]
         with mock.patch.object(self.container, "inspect") as mock_inspect:
             fake_inspect = mock.MagicMock()
-            fake_inspect.State.Restarting = False
-            fake_inspect.State.Status = "running"
-            fake_inspect.State.Running = True
-            fake_inspect.State.Paused = False
-            fake_inspect.State.OOMKilled = False
-            fake_inspect.State.Dead = False
-            fake_inspect.State.Health.Status = "unhealthy"
-            mock_inspect.side_effect = [fake_inspect, fake_inspect]
-            self.assertFalse(self.container.healthy)
+            fake_inspect.is_available = False
+            fake_inspect.is_active = False
+            fake_inspect.is_alive = False
+            mock_inspect.side_effect = [fake_inspect] * 4
+            self.assertFalse(self.container.available)
+            self.assertFalse(self.container.active)
+            self.assertFalse(self.container.alive)
             self.assertEqual(self.container.guard(), 456)
 
     @mock.patch.object(podman.DaemonTaskJob, "create_daemon_task")
