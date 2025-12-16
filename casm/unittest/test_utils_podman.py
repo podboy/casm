@@ -5,6 +5,7 @@ from unittest import TestCase
 from unittest import main
 from unittest import mock
 
+from casm.unittest.helper import FakeInspect
 from casm.utils import podman
 
 
@@ -12,33 +13,7 @@ class Test_podman_container_inspect(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.health = {
-            "Status": "healthy",
-            "FailingStreak": 0,
-        }
-        cls.state = {
-            "Status": "created",
-            "Running": False,
-            "Paused": False,
-            "Restarting": False,
-            "OOMKilled": False,
-            "Dead": False,
-            "Pid": 1,
-            "ConmonPid": 2,
-            "ExitCode": 3,
-            "Health": cls.health,
-        }
-        cls.host_config = {
-            "Binds": [],
-        }
-        cls.inspect = {
-            "Id": "123456",
-            "Name": "demo",
-            "RestartCount": 1,
-            "PidFile": "/tmp/demo.pid",
-            "State": cls.state,
-            "HostConfig": cls.host_config,
-        }
+        pass
 
     @classmethod
     def tearDownClass(cls):
@@ -46,9 +21,7 @@ class Test_podman_container_inspect(TestCase):
 
     def setUp(self):
         self.container = podman.Container()
-        with mock.patch.object(self.container, "inspect") as mock_inspect:
-            mock_inspect.side_effect = [self.inspect]
-            self.container_inspect = podman.podman_container_inspect(self.container)  # noqa:E501
+        self.container_inspect = FakeInspect().create(self.container)
 
     def tearDown(self):
         pass
