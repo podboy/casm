@@ -82,7 +82,7 @@ def run_cmd_container_inspect(cmds: Command) -> int:
     containers: List[podman_container] = [podman_container(name) for name in container_names]  # noqa:E501
     for container in containers:
         inspect: podman_container_inspect = container.inspect()
-        cmds.stdout(f"container {container.container_name} inspect:")
+        cmds.stdout(f"The low-level information of container {container.container_name}:")  # noqa:E501
         cmds.stdout(f"State.Status: {inspect.State.Status}")
         cmds.stdout(f"State.Running: {inspect.State.Running}")
         cmds.stdout(f"State.Restarting: {inspect.State.Restarting}")
@@ -93,8 +93,7 @@ def run_cmd_container_inspect(cmds: Command) -> int:
         if inspect.State.Health is not None:
             cmds.stdout(f"State.Health.Status: {inspect.State.Health.Status}")
 
-        available: str = "available" if inspect.is_available else "unavailable"
-        cmds.stdout_red(f"container {container.container_name} is {available}")
+        cmds.stdout_green("container is available") if inspect.is_available else cmds.stdout_red("container is unavailable")  # noqa:E501
     return 0
 
 
